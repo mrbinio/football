@@ -49,7 +49,7 @@ export default function Lineups() {
 
   return (
     <div style={{ padding: 24, paddingBottom: 80, maxWidth: 640, margin: '0 auto' }}>
-      <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20 }}>Saved Lineups</h2>
+      <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, letterSpacing: -0.5 }}>Matches</h2>
 
       {/* Edit modal */}
       {editId && (

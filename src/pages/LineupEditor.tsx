@@ -260,19 +260,24 @@ export default function LineupEditor() {
     return (
       <div style={{ padding: '16px', paddingBottom: 140, maxWidth: 500, margin: '0 auto' }}>
         {/* Controls */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
-          <input type="date" value={matchDate} onChange={e => setMatchDate(e.target.value)} style={{ flex: 1, minWidth: 120 }} />
-          <input placeholder="Opponent" value={opponent} onChange={e => setOpponent(e.target.value)} style={{ flex: 1, minWidth: 100 }} />
-        </div>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-          <input placeholder="Title (e.g. Cup Round 2)" value={title} onChange={e => setTitle(e.target.value)} style={{ flex: 1 }} />
-          <select value={gameFormat} onChange={e => { const f = e.target.value as GameFormat; setGameFormat(f); setFormation(formations[f][0]); setPositions({}) }} style={{ width: 60 }}>
-            <option value="7v7">7v7</option>
-            <option value="5v5">5v5</option>
-          </select>
-          <select value={formation.name} onChange={e => setFormation(formations[gameFormat].find(f => f.name === e.target.value)!)} style={{ width: 80 }}>
-            {formations[gameFormat].map(f => <option key={f.name}>{f.name}</option>)}
-          </select>
+        <div style={{
+          background: 'rgba(255,255,255,0.02)', borderRadius: 14,
+          padding: 12, marginBottom: 14, border: '1px solid rgba(255,255,255,0.04)',
+        }}>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+            <input type="date" value={matchDate} onChange={e => setMatchDate(e.target.value)} style={{ flex: 1, minWidth: 110 }} />
+            <input placeholder="Opponent" value={opponent} onChange={e => setOpponent(e.target.value)} style={{ flex: 1, minWidth: 90 }} />
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input placeholder="Title (e.g. Cup Round 2)" value={title} onChange={e => setTitle(e.target.value)} style={{ flex: 1 }} />
+            <select value={gameFormat} onChange={e => { const f = e.target.value as GameFormat; setGameFormat(f); setFormation(formations[f][0]); setPositions({}) }} style={{ width: 56 }}>
+              <option value="7v7">7v7</option>
+              <option value="5v5">5v5</option>
+            </select>
+            <select value={formation.name} onChange={e => setFormation(formations[gameFormat].find(f => f.name === e.target.value)!)} style={{ width: 76 }}>
+              {formations[gameFormat].map(f => <option key={f.name}>{f.name}</option>)}
+            </select>
+          </div>
         </div>
 
         {/* Pitch - full width */}
@@ -419,18 +424,18 @@ export default function LineupEditor() {
         {/* Floating action bar */}
         <div style={{
           position: 'fixed', bottom: 56, left: 0, right: 0,
-          display: 'flex', gap: 8, padding: '10px 16px',
-          background: 'rgba(10,10,10,0.97)', backdropFilter: 'blur(10px)',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
+          display: 'flex', gap: 6, padding: '10px 12px',
+          background: 'rgba(8,8,8,0.98)', backdropFilter: 'blur(20px)',
+          borderTop: '1px solid rgba(255,255,255,0.04)',
           zIndex: 100,
         }}>
-          <button onClick={handleSave} disabled={saving} style={{ flex: 1, background: 'linear-gradient(135deg, #d32f2f, #b71c1c)', color: '#fff' }}>
+          <button onClick={handleSave} disabled={saving} style={{ flex: 1, background: 'linear-gradient(135deg, #d32f2f, #9a0007)', color: '#fff', fontSize: 12, padding: '10px 0', boxShadow: '0 2px 12px rgba(211,47,47,0.2)' }}>
             {saving ? '...' : '💾 Save'}
           </button>
-          <button onClick={handleShare} style={{ flex: 1, background: 'linear-gradient(135deg, #25D366, #128C7E)', color: '#fff' }}>
+          <button onClick={handleShare} style={{ flex: 1, background: 'linear-gradient(135deg, #1a1a1a, #111)', color: '#ccc', fontSize: 12, padding: '10px 0', border: '1px solid rgba(255,255,255,0.08)' }}>
             ⚽ Lineup
           </button>
-          <button onClick={handleShareSquad} style={{ flex: 1, background: 'linear-gradient(135deg, #1565C0, #0D47A1)', color: '#fff' }}>
+          <button onClick={handleShareSquad} style={{ flex: 1, background: 'linear-gradient(135deg, #1a1a1a, #111)', color: '#ccc', fontSize: 12, padding: '10px 0', border: '1px solid rgba(255,255,255,0.08)' }}>
             📋 Squad
           </button>
         </div>
