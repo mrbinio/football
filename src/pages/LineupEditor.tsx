@@ -152,9 +152,6 @@ export default function LineupEditor() {
   const handleShare = async () => {
     if (!pitchRef.current) return
     try {
-      const pitchDiv = pitchRef.current.querySelector('[data-pitch]') as HTMLElement | null
-      if (pitchDiv) pitchDiv.style.transform = 'none'
-
       const dataUrl = await toPng(pitchRef.current, {
         backgroundColor: '#111',
         pixelRatio: 2,
@@ -163,8 +160,6 @@ export default function LineupEditor() {
           return true
         },
       })
-
-      if (pitchDiv) pitchDiv.style.transform = 'rotateX(4deg)'
 
       const blob = await (await fetch(dataUrl)).blob()
       const file = new File([blob], `lineup-${matchDate}.png`, { type: 'image/png' })

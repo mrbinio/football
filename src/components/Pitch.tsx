@@ -12,15 +12,13 @@ interface Props {
 
 export default function Pitch({ formation, positions, players, onPositionTap, selectedPlayer }: Props) {
   return (
-    <div style={{ perspective: '800px' }}>
+    <div>
       <div data-pitch style={{
         position: 'relative', width: '100%', paddingBottom: '140%',
         borderRadius: 18, overflow: 'hidden',
         background: 'linear-gradient(180deg, #15572a 0%, #1d7a36 25%, #22913e 50%, #1d7a36 75%, #15572a 100%)',
         boxShadow: '0 16px 48px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
         border: '1px solid rgba(255,255,255,0.08)',
-        transform: 'rotateX(4deg)',
-        transformOrigin: 'center bottom',
       }}>
         {/* Mowed grass effect */}
         <div style={{ position: 'absolute', inset: 0 }}>
