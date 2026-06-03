@@ -35,9 +35,9 @@ export default function Pitch({ formation, positions, players, onPositionTap, se
         <div style={{
           position: 'absolute', top: '50%', left: '50%',
           transform: 'translate(-50%, -50%)',
-          opacity: 0.06, pointerEvents: 'none',
+          opacity: 0.12, pointerEvents: 'none',
         }}>
-          <img src="/bp-logo.jpg" alt="" style={{ width: 100, height: 'auto', borderRadius: 10 }} />
+          <img src="/bp-logo.jpg" alt="" style={{ width: 120, height: 'auto', borderRadius: 10 }} />
         </div>
 
         {/* Vignette overlay */}

@@ -25,8 +25,39 @@ export default function LineupEditor() {
   const [saving, setSaving] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null)
   const [nextIn, setNextIn] = useState<string[]>([])
+  const [timerRunning, setTimerRunning] = useState(false)
+  const [timerSeconds, setTimerSeconds] = useState(0)
+  const [playerMinutes, setPlayerMinutes] = useState<Record<string, number>>({})
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const pitchRef = useRef<HTMLDivElement>(null)
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+
+  // Timer logic — track minutes per player on pitch
+  useEffect(() => {
+    if (timerRunning) {
+      timerRef.current = setInterval(() => {
+        setTimerSeconds(s => {
+          const newS = s + 1
+          // Every 60 seconds, add 1 minute to players on pitch
+          if (newS % 60 === 0) {
+            setPlayerMinutes(prev => {
+              const updated = { ...prev }
+              Object.values(positions).forEach(pId => {
+                updated[pId] = (updated[pId] || 0) + 1
+              })
+              return updated
+            })
+          }
+          return newS
+        })
+      }, 1000)
+    } else if (timerRef.current) {
+      clearInterval(timerRef.current)
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+  }, [timerRunning, positions])
+
+  const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`
 
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 5 } })
   const sensors = useSensors(mouseSensor)
@@ -281,6 +312,32 @@ export default function LineupEditor() {
           </div>
         </div>
 
+        {/* Match timer */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14,
+          background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: '10px 14px',
+          border: '1px solid rgba(255,255,255,0.06)',
+        }}>
+          <span style={{ fontSize: 22, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: timerRunning ? '#4CAF50' : '#888', flex: 1 }}>
+            ⏱ {formatTime(timerSeconds)}
+          </span>
+          <button onClick={() => setTimerRunning(!timerRunning)} style={{
+            background: timerRunning ? 'rgba(244,67,54,0.15)' : 'rgba(76,175,80,0.15)',
+            color: timerRunning ? '#f44' : '#4CAF50',
+            border: `1px solid ${timerRunning ? 'rgba(244,67,54,0.3)' : 'rgba(76,175,80,0.3)'}`,
+            padding: '6px 14px', fontSize: 12,
+          }}>
+            {timerRunning ? '⏸ Pause' : '▶ Start'}
+          </button>
+          <button onClick={() => { setTimerRunning(false); setTimerSeconds(0); setPlayerMinutes({}) }} style={{
+            background: 'rgba(255,255,255,0.05)', color: '#888',
+            border: '1px solid rgba(255,255,255,0.08)',
+            padding: '6px 10px', fontSize: 12,
+          }}>
+            ↺
+          </button>
+        </div>
+
         {/* Pitch - full width */}
         <div ref={pitchRef}>
           <Pitch
@@ -404,6 +461,7 @@ export default function LineupEditor() {
                   const p = players.find(pl => pl.id === pId)
                   if (!p) return null
                   const posLabel = formation.positions.find(fp => fp.key === posKey)?.label || posKey
+                  const mins = playerMinutes[pId] || 0
                   return (
                     <div key={pId} onClick={() => handleRemoveFromPosition(pId)} style={{
                       display: 'flex', alignItems: 'center', gap: 8,
@@ -417,7 +475,8 @@ export default function LineupEditor() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 8, fontWeight: 700, color: '#fff', flexShrink: 0,
                       }}>{posLabel}</div>
-                      <div style={{ fontSize: 11, fontWeight: 600, color: '#eee' }}>{p.shirtName}</div>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: '#eee', flex: 1 }}>{p.shirtName}</div>
+                      {mins > 0 && <span style={{ fontSize: 10, color: '#4CAF50', fontWeight: 600 }}>{mins}′</span>}
                     </div>
                   )
                 })}
