@@ -8,9 +8,10 @@ interface Props {
   players: Player[]
   onPositionTap?: (posKey: string) => void
   selectedPlayer?: string | null
+  playerSeconds?: Record<string, number>
 }
 
-export default function Pitch({ formation, positions, players, onPositionTap, selectedPlayer }: Props) {
+export default function Pitch({ formation, positions, players, onPositionTap, selectedPlayer, playerSeconds }: Props) {
   return (
     <div>
       <div style={{
@@ -78,6 +79,7 @@ export default function Pitch({ formation, positions, players, onPositionTap, se
             x={pos.x}
             y={pos.y}
             player={players.find(p => p.id === positions[pos.key])}
+            timeSeconds={positions[pos.key] && playerSeconds ? playerSeconds[positions[pos.key]] : undefined}
             onTap={onPositionTap}
             isTarget={!!selectedPlayer && !positions[pos.key]}
           />
@@ -87,8 +89,8 @@ export default function Pitch({ formation, positions, players, onPositionTap, se
   )
 }
 
-function PositionSlot({ posKey, label, x, y, player, onTap, isTarget }: {
-  posKey: string; label: string; x: number; y: number; player?: Player
+function PositionSlot({ posKey, label, x, y, player, timeSeconds, onTap, isTarget }: {
+  posKey: string; label: string; x: number; y: number; player?: Player; timeSeconds?: number
   onTap?: (posKey: string) => void; isTarget?: boolean
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: posKey })
@@ -116,7 +118,7 @@ function PositionSlot({ posKey, label, x, y, player, onTap, isTarget }: {
       }}
     >
       {player ? (
-        <PlayerJersey player={player} size="pitch" />
+        <PlayerJersey player={player} size="pitch" timeSeconds={timeSeconds} />
       ) : (
         <div style={{
           width: 42, height: 46,

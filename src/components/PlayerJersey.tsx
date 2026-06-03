@@ -4,9 +4,10 @@ import { Player } from '../types'
 interface Props {
   player: Player
   size?: 'small' | 'pitch'
+  timeSeconds?: number
 }
 
-export default function PlayerJersey({ player, size = 'small' }: Props) {
+export default function PlayerJersey({ player, size = 'small', timeSeconds }: Props) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: player.id })
 
   const style: React.CSSProperties = {
@@ -89,6 +90,15 @@ export default function PlayerJersey({ player, size = 'small' }: Props) {
         }}>
           {displayName}
         </span>
+        {timeSeconds !== undefined && timeSeconds > 0 && (
+          <span style={{
+            fontSize: 8, fontWeight: 600, color: '#FFC107',
+            textShadow: '0 1px 2px rgba(0,0,0,0.9)',
+            marginTop: 1,
+          }}>
+            {Math.floor(timeSeconds / 60)}:{(timeSeconds % 60).toString().padStart(2, '0')}
+          </span>
+        )}
       </div>
     )
   }

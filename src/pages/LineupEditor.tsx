@@ -337,6 +337,7 @@ export default function LineupEditor() {
           <Pitch
             formation={formation} positions={positions} players={players}
             onPositionTap={handlePositionTap} selectedPlayer={selectedPlayer}
+            playerSeconds={playerMinutes}
           />
           {bench.length > 0 && (
             <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginTop: 10, padding: '10px', background: 'rgba(0,0,0,0.3)', borderRadius: 12 }}>
@@ -549,7 +550,7 @@ export default function LineupEditor() {
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
           <div ref={pitchRef} style={{ flex: 1, minWidth: 300 }}>
-            <Pitch formation={formation} positions={positions} players={players} />
+            <Pitch formation={formation} positions={positions} players={players} playerSeconds={playerMinutes} />
           </div>
           <div style={{ width: 220, display: 'flex', flexDirection: 'column', gap: 16, position: 'sticky', top: 80 }}>
             <div style={{ background: 'linear-gradient(135deg, #141414, #1a1a1a)', borderRadius: 14, padding: 14, border: '1px solid rgba(255,255,255,0.06)' }}>
