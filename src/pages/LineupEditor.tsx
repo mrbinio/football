@@ -430,7 +430,7 @@ export default function LineupEditor() {
         <div style={{
           position: 'fixed', bottom: 56, left: 0, right: 0,
           display: 'flex', gap: 6, padding: '10px 12px',
-          background: 'rgba(20,20,20,0.98)', backdropFilter: 'blur(20px)',
+          background: 'rgba(16,20,28,0.98)', backdropFilter: 'blur(20px)',
           borderTop: '1px solid rgba(255,255,255,0.06)',
           zIndex: 100,
         }}>

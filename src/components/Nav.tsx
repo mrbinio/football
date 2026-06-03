@@ -14,7 +14,7 @@ export default function Nav() {
         {/* Top bar - minimal */}
         <div style={{
           display: 'flex', alignItems: 'center', padding: '10px 16px',
-          background: 'rgba(24,24,24,0.95)', backdropFilter: 'blur(20px)',
+          background: 'rgba(18,22,32,0.95)', backdropFilter: 'blur(20px)',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
           position: 'sticky', top: 0, zIndex: 100,
         }}>
@@ -32,7 +32,7 @@ export default function Nav() {
         <nav style={{
           position: 'fixed', bottom: 0, left: 0, right: 0,
           display: 'flex', zIndex: 99,
-          background: 'rgba(20,20,20,0.97)', backdropFilter: 'blur(20px)',
+          background: 'rgba(16,20,28,0.97)', backdropFilter: 'blur(20px)',
           borderTop: '1px solid rgba(255,255,255,0.08)',
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}>
@@ -48,7 +48,7 @@ export default function Nav() {
   return (
     <nav style={{
       display: 'flex', gap: 20, padding: '14px 28px',
-      background: 'rgba(22,22,22,0.95)', backdropFilter: 'blur(20px)',
+      background: 'rgba(18,22,32,0.95)', backdropFilter: 'blur(20px)',
       alignItems: 'center',
       borderBottom: '1px solid rgba(255,255,255,0.07)',
       position: 'sticky', top: 0, zIndex: 100,

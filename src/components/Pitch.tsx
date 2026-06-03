@@ -31,6 +31,15 @@ export default function Pitch({ formation, positions, players, onPositionTap, se
           ))}
         </div>
 
+        {/* Center logo watermark */}
+        <div style={{
+          position: 'absolute', top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          opacity: 0.06, pointerEvents: 'none',
+        }}>
+          <img src="/bp-logo.jpg" alt="" style={{ width: 100, height: 'auto', borderRadius: 10 }} />
+        </div>
+
         {/* Vignette overlay */}
         <div style={{
           position: 'absolute', inset: 0,
