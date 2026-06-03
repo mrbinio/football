@@ -168,7 +168,7 @@ export default function LineupEditor() {
             })
             saved.push({ el: img, original: img.src })
             img.src = b64
-          } catch { /* skip */ }
+          } catch (_e) { /* skip */ }
         }
       }
 
