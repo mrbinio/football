@@ -23,7 +23,11 @@ export default function Lineups() {
 
   const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation()
-    if (confirm('Delete this lineup?')) deleteDoc(doc(db, 'lineups', id))
+    e.preventDefault()
+    const yes = window.confirm('Delete this lineup?')
+    if (yes) {
+      deleteDoc(doc(db, 'lineups', id))
+    }
   }
 
   const openEdit = (e: React.MouseEvent, l: Lineup) => {
@@ -115,8 +119,8 @@ export default function Lineups() {
                 </div>
                 {l.result && <div style={{ fontSize: 11, color: '#d32f2f', marginTop: 2 }}>Result: {l.result} {l.rating ? '★'.repeat(l.rating) : ''}</div>}
               </div>
-              <button onClick={e => openEdit(e, l)} style={{ background: 'rgba(255,255,255,0.05)', color: '#888', padding: '6px 10px', fontSize: 11, border: '1px solid rgba(255,255,255,0.08)' }}>✏️</button>
-              <button onClick={e => handleDelete(e, l.id)} style={{ background: 'rgba(255,255,255,0.05)', color: '#d32f2f', padding: '6px 10px', fontSize: 11, border: '1px solid rgba(255,255,255,0.08)' }}>✕</button>
+              <button onClick={e => openEdit(e, l)} onTouchEnd={e => { e.stopPropagation(); openEdit(e as unknown as React.MouseEvent, l) }} style={{ background: 'rgba(255,255,255,0.05)', color: '#888', padding: '8px 12px', fontSize: 12, border: '1px solid rgba(255,255,255,0.08)', minWidth: 36 }}>✏️</button>
+              <button onClick={e => handleDelete(e, l.id)} onTouchEnd={e => { e.stopPropagation(); handleDelete(e as unknown as React.MouseEvent, l.id) }} style={{ background: 'rgba(255,255,255,0.05)', color: '#d32f2f', padding: '8px 12px', fontSize: 12, border: '1px solid rgba(255,255,255,0.08)', minWidth: 36 }}>✕</button>
             </div>
           </div>
         ))}
