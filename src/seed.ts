@@ -1,11 +1,9 @@
-import { collection, getDocs, addDoc } from 'firebase/firestore'
+import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore'
 import { db } from './firebase'
 
 const initialPlayers = [
   { name: 'Adam Kiersznikiewicz Maburi', shirtName: 'Kiersznikiewicz Maburi', number: 8, position: 'CM' },
   { name: 'Alexander Dziuba', shirtName: 'Dziuba', number: 6, position: 'CB' },
-  { name: 'Alexander Sundqvist', shirtName: 'Sundqvist', number: 0, position: 'CM' },
-  { name: 'André Leikman', shirtName: 'Leikman', number: 0, position: 'CM' },
   { name: 'Caspian Pazaj Dahlqvist', shirtName: 'Pazaj Dahlqvist', number: 12, position: 'LW' },
   { name: 'Elias Hasani', shirtName: 'Hasani', number: 13, position: 'ST' },
   { name: 'Elias Lundqvist Good', shirtName: 'Lundqvist Good', number: 10, position: 'CM' },
@@ -18,19 +16,28 @@ const initialPlayers = [
   { name: 'Melker Gustafsson', shirtName: 'Gustafsson', number: 16, position: 'RW' },
   { name: 'Målvakt', shirtName: 'GK', number: 1, position: 'GK' },
   { name: 'Samuel Hjelte', shirtName: 'Hjelte', number: 5, position: 'CB' },
-  { name: 'Simon Hjelte', shirtName: 'S. Hjelte', number: 0, position: 'CM' },
   { name: 'Vincent Leikman', shirtName: 'V. Leikman', number: 17, position: 'LM' },
 ]
 
+// Coaches that were mistakenly added as players
+const coachNames = ['Alexander Sundqvist', 'Simon Hjelte', 'André Leikman']
+
 export async function seedPlayers() {
   const snap = await getDocs(collection(db, 'players'))
-  const existingNames = snap.docs.map(d => d.data().name as string)
+  const existing = snap.docs.map(d => ({ id: d.id, name: d.data().name as string }))
 
+  // Remove coaches from players if they were added
+  for (const entry of existing) {
+    if (coachNames.includes(entry.name)) {
+      await deleteDoc(doc(db, 'players', entry.id))
+    }
+  }
+
+  // Add missing players
+  const existingNames = existing.map(e => e.name).filter(n => !coachNames.includes(n))
   const toAdd = initialPlayers.filter(p => !existingNames.includes(p.name))
-  if (toAdd.length === 0) return
-
   for (const player of toAdd) {
     await addDoc(collection(db, 'players'), player)
   }
-  console.log(`Seeded ${toAdd.length} players`)
+  if (toAdd.length) console.log(`Seeded ${toAdd.length} players`)
 }
