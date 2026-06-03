@@ -1,4 +1,4 @@
-import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth'
+import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, browserPopupRedirectResolver } from 'firebase/auth'
 import { auth } from '../firebase'
 import { useState } from 'react'
 
@@ -13,12 +13,8 @@ export default function Login() {
 
   const handleGoogle = () => {
     setError('')
-    signInWithPopup(auth, new GoogleAuthProvider()).catch(e => {
-      if (e.code === 'auth/popup-blocked') {
-        setError('Popup blocked! Allow popups for this site in your browser, then try again.')
-      } else {
-        setError(e.message)
-      }
+    signInWithPopup(auth, new GoogleAuthProvider(), browserPopupRedirectResolver).catch(e => {
+      setError(e.message)
     })
   }
 

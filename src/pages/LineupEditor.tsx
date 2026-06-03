@@ -9,7 +9,7 @@ import Pitch from '../components/Pitch'
 import BenchArea from '../components/BenchArea'
 import PlayerJersey from '../components/PlayerJersey'
 import { getCoachName } from '../coaches'
-import { toPng } from 'html-to-image'
+import html2canvas from 'html2canvas'
 
 export default function LineupEditor() {
   const { id } = useParams()
@@ -152,24 +152,13 @@ export default function LineupEditor() {
   const handleShare = async () => {
     if (!pitchRef.current) return
     try {
-      // Hide external images, show jersey fallback
-      const images = pitchRef.current.querySelectorAll('img') as NodeListOf<HTMLImageElement>
-      const hidden: HTMLImageElement[] = []
-      images.forEach(img => {
-        if (img.src && img.src.includes('firebasestorage')) {
-          img.style.display = 'none'
-          hidden.push(img)
-        }
-      })
-
-      const dataUrl = await toPng(pitchRef.current, {
+      const canvas = await html2canvas(pitchRef.current, {
         backgroundColor: '#111',
-        pixelRatio: 2,
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
       })
-
-      // Restore images
-      hidden.forEach(img => { img.style.display = '' })
-
+      const dataUrl = canvas.toDataURL('image/png')
       const blob = await (await fetch(dataUrl)).blob()
       const file = new File([blob], `lineup-${matchDate}.png`, { type: 'image/png' })
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
