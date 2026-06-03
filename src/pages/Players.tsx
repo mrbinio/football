@@ -47,7 +47,7 @@ export default function Players() {
         photoURL = null
       }
 
-      const data: Record<string, unknown> = { name, shirtName, number: parseInt(number), position }
+      const data: { [key: string]: string | number } = { name, shirtName, number: parseInt(number), position }
       if (photoURL !== undefined) data.photoURL = photoURL || ''
 
       if (editId) {
@@ -193,7 +193,7 @@ function CoachesSection() {
       } else if (removePhoto) {
         photoURL = null
       }
-      const data: Record<string, unknown> = { name }
+      const data: { [key: string]: string | number } = { name }
       if (photoURL !== undefined) data.photoURL = photoURL || ''
       await updateDoc(doc(db, 'coaches', editId), data)
       setShowModal(false)
