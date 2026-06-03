@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { collection, addDoc, updateDoc, doc, onSnapshot } from 'firebase/firestore'
 import { db, auth } from '../firebase'
 import { Player, Lineup } from '../types'
-import { formations } from '../formations'
+import { formations, GameFormat } from '../formations'
 import { useParams } from 'react-router-dom'
 import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, MouseSensor, useSensor, useSensors } from '@dnd-kit/core'
 import Pitch from '../components/Pitch'
@@ -14,7 +14,8 @@ import { toPng } from 'html-to-image'
 export default function LineupEditor() {
   const { id } = useParams()
   const [players, setPlayers] = useState<Player[]>([])
-  const [formation, setFormation] = useState(formations[0])
+  const [gameFormat, setGameFormat] = useState<GameFormat>('7v7')
+  const [formation, setFormation] = useState(formations['7v7'][0])
   const [positions, setPositions] = useState<Record<string, string>>({})
   const [bench, setBench] = useState<string[]>([])
   const [matchDate, setMatchDate] = useState(new Date().toISOString().split('T')[0])
@@ -45,8 +46,11 @@ export default function LineupEditor() {
       setMatchDate(data.matchDate)
       setOpponent(data.opponent)
       if (data.title) setTitle(data.title)
-      const f = formations.find(fm => fm.name === data.formation)
-      if (f) setFormation(f)
+      const f = [...formations['7v7'], ...formations['5v5']].find(fm => fm.name === data.formation)
+      if (f) {
+        setFormation(f)
+        setGameFormat(formations['5v5'].some(ff => ff.name === f.name) ? '5v5' : '7v7')
+      }
     })
   }, [id])
 
@@ -148,7 +152,13 @@ export default function LineupEditor() {
   const handleShare = async () => {
     if (!pitchRef.current) return
     try {
-      const dataUrl = await toPng(pitchRef.current, { backgroundColor: '#0a0a0a', pixelRatio: 2 })
+      const dataUrl = await toPng(pitchRef.current, {
+        backgroundColor: '#111',
+        pixelRatio: 2,
+        skipFonts: true,
+        cacheBust: true,
+        fetchRequestInit: { mode: 'cors' },
+      })
       const blob = await (await fetch(dataUrl)).blob()
       const file = new File([blob], `lineup-${matchDate}.png`, { type: 'image/png' })
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -160,7 +170,10 @@ export default function LineupEditor() {
         a.click()
         window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(`Lineup vs ${opponent || 'TBD'} (${matchDate})`)}`, '_blank')
       }
-    } catch (err) { console.error(err) }
+    } catch (err) {
+      console.error('Share error:', err)
+      alert('Could not generate image. Try on a different browser or device.')
+    }
   }
 
   const activePlayer = players.find(p => p.id === activeId)
@@ -176,8 +189,12 @@ export default function LineupEditor() {
         </div>
         <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
           <input placeholder="Title (e.g. Cup Round 2)" value={title} onChange={e => setTitle(e.target.value)} style={{ flex: 1 }} />
-          <select value={formation.name} onChange={e => setFormation(formations.find(f => f.name === e.target.value)!)} style={{ width: 90 }}>
-            {formations.map(f => <option key={f.name}>{f.name}</option>)}
+          <select value={gameFormat} onChange={e => { const f = e.target.value as GameFormat; setGameFormat(f); setFormation(formations[f][0]); setPositions({}) }} style={{ width: 60 }}>
+            <option value="7v7">7v7</option>
+            <option value="5v5">5v5</option>
+          </select>
+          <select value={formation.name} onChange={e => setFormation(formations[gameFormat].find(f => f.name === e.target.value)!)} style={{ width: 80 }}>
+            {formations[gameFormat].map(f => <option key={f.name}>{f.name}</option>)}
           </select>
         </div>
 
@@ -325,8 +342,12 @@ export default function LineupEditor() {
         <input type="date" value={matchDate} onChange={e => setMatchDate(e.target.value)} />
         <input placeholder="Opponent" value={opponent} onChange={e => setOpponent(e.target.value)} style={{ width: 140 }} />
         <input placeholder="Title (e.g. Cup Round 2)" value={title} onChange={e => setTitle(e.target.value)} style={{ width: 160 }} />
-        <select value={formation.name} onChange={e => setFormation(formations.find(f => f.name === e.target.value)!)}>
-          {formations.map(f => <option key={f.name}>{f.name}</option>)}
+        <select value={gameFormat} onChange={e => { const f = e.target.value as GameFormat; setGameFormat(f); setFormation(formations[f][0]); setPositions({}) }} style={{ width: 70 }}>
+          <option value="7v7">7v7</option>
+          <option value="5v5">5v5</option>
+        </select>
+        <select value={formation.name} onChange={e => setFormation(formations[gameFormat].find(f => f.name === e.target.value)!)}>
+          {formations[gameFormat].map(f => <option key={f.name}>{f.name}</option>)}
         </select>
         <div style={{ flex: 1 }} />
         <button onClick={handleSave} disabled={saving} style={{ background: 'linear-gradient(135deg, #d32f2f, #b71c1c)', color: '#fff', boxShadow: '0 2px 10px rgba(211,47,47,0.3)' }}>

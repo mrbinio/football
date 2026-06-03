@@ -12,54 +12,70 @@ interface Props {
 
 export default function Pitch({ formation, positions, players, onPositionTap, selectedPlayer }: Props) {
   return (
-    <div style={{
-      position: 'relative', width: '100%', paddingBottom: '150%',
-      borderRadius: 18, overflow: 'hidden',
-      background: 'linear-gradient(180deg, #15572a 0%, #1d7a36 25%, #22913e 50%, #1d7a36 75%, #15572a 100%)',
-      boxShadow: '0 12px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
-      border: '1px solid rgba(255,255,255,0.06)',
-    }}>
-      {/* Mowed grass effect */}
-      <div style={{ position: 'absolute', inset: 0 }}>
-        {[...Array(14)].map((_, i) => (
-          <div key={i} style={{
-            position: 'absolute', left: 0, right: 0,
-            top: `${i * 7.14}%`, height: '3.57%',
-            background: i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
-          }} />
+    <div style={{ perspective: '800px' }}>
+      <div style={{
+        position: 'relative', width: '100%', paddingBottom: '140%',
+        borderRadius: 18, overflow: 'hidden',
+        background: 'linear-gradient(180deg, #15572a 0%, #1d7a36 25%, #22913e 50%, #1d7a36 75%, #15572a 100%)',
+        boxShadow: '0 16px 48px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        transform: 'rotateX(4deg)',
+        transformOrigin: 'center bottom',
+      }}>
+        {/* Mowed grass effect */}
+        <div style={{ position: 'absolute', inset: 0 }}>
+          {[...Array(14)].map((_, i) => (
+            <div key={i} style={{
+              position: 'absolute', left: 0, right: 0,
+              top: `${i * 7.14}%`, height: '3.57%',
+              background: i % 2 === 0 ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.025)',
+            }} />
+          ))}
+        </div>
+
+        {/* Vignette overlay */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.25) 100%)',
+          pointerEvents: 'none',
+        }} />
+
+        {/* Pitch markings */}
+        <svg viewBox="0 0 100 140" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} preserveAspectRatio="none">
+          <rect x="5" y="5" width="90" height="130" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="0.35" rx="0.5" />
+          <line x1="5" y1="70" x2="95" y2="70" stroke="rgba(255,255,255,0.45)" strokeWidth="0.35" />
+          <circle cx="50" cy="70" r="12" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="0.35" />
+          <circle cx="50" cy="70" r="0.8" fill="rgba(255,255,255,0.5)" />
+          {/* Top penalty area */}
+          <rect x="25" y="5" width="50" height="20" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.35" />
+          <rect x="35" y="5" width="30" height="9" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.3" />
+          <path d="M 36 25 A 10 10 0 0 0 64 25" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.3" />
+          <circle cx="50" cy="17" r="0.6" fill="rgba(255,255,255,0.4)" />
+          {/* Bottom penalty area */}
+          <rect x="25" y="115" width="50" height="20" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.35" />
+          <rect x="35" y="126" width="30" height="9" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.3" />
+          <path d="M 36 115 A 10 10 0 0 1 64 115" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.3" />
+          <circle cx="50" cy="123" r="0.6" fill="rgba(255,255,255,0.4)" />
+          {/* Corner arcs */}
+          <path d="M 5 8 A 3 3 0 0 0 8 5" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.3" />
+          <path d="M 92 5 A 3 3 0 0 0 95 8" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.3" />
+          <path d="M 5 132 A 3 3 0 0 1 8 135" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.3" />
+          <path d="M 92 135 A 3 3 0 0 1 95 132" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.3" />
+        </svg>
+
+        {formation.positions.map(pos => (
+          <PositionSlot
+            key={pos.key}
+            posKey={pos.key}
+            label={pos.label}
+            x={pos.x}
+            y={pos.y}
+            player={players.find(p => p.id === positions[pos.key])}
+            onTap={onPositionTap}
+            isTarget={!!selectedPlayer && !positions[pos.key]}
+          />
         ))}
       </div>
-
-      {/* Pitch markings */}
-      <svg viewBox="0 0 100 135" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} preserveAspectRatio="none">
-        <rect x="5" y="5" width="90" height="125" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.35" />
-        <line x1="5" y1="67.5" x2="95" y2="67.5" stroke="rgba(255,255,255,0.4)" strokeWidth="0.35" />
-        <circle cx="50" cy="67.5" r="10" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.35" />
-        <circle cx="50" cy="67.5" r="0.7" fill="rgba(255,255,255,0.4)" />
-        <rect x="25" y="5" width="50" height="18" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.35" />
-        <rect x="35" y="5" width="30" height="8" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.3" />
-        <rect x="25" y="112" width="50" height="18" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.35" />
-        <rect x="35" y="122" width="30" height="8" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.3" />
-        <path d="M 36 23 A 9 9 0 0 0 64 23" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.3" />
-        <path d="M 36 112 A 9 9 0 0 1 64 112" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.3" />
-        <path d="M 5 8 A 3 3 0 0 0 8 5" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="0.3" />
-        <path d="M 92 5 A 3 3 0 0 0 95 8" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="0.3" />
-        <path d="M 5 127 A 3 3 0 0 1 8 130" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="0.3" />
-        <path d="M 92 130 A 3 3 0 0 1 95 127" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="0.3" />
-      </svg>
-
-      {formation.positions.map(pos => (
-        <PositionSlot
-          key={pos.key}
-          posKey={pos.key}
-          label={pos.label}
-          x={pos.x}
-          y={pos.y}
-          player={players.find(p => p.id === positions[pos.key])}
-          onTap={onPositionTap}
-          isTarget={!!selectedPlayer && !positions[pos.key]}
-        />
-      ))}
     </div>
   )
 }
@@ -69,7 +85,6 @@ function PositionSlot({ posKey, label, x, y, player, onTap, isTarget }: {
   onTap?: (posKey: string) => void; isTarget?: boolean
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: posKey })
-
   const handleClick = () => { if (onTap) onTap(posKey) }
 
   return (
@@ -79,7 +94,7 @@ function PositionSlot({ posKey, label, x, y, player, onTap, isTarget }: {
       style={{
         position: 'absolute',
         left: `${x}%`,
-        top: `${(y / 1.5)}%`,
+        top: `${(y / 1.4)}%`,
         transform: 'translate(-50%, -50%)',
         display: 'flex',
         flexDirection: 'column',
