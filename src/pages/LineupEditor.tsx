@@ -37,7 +37,7 @@ export default function LineupEditor() {
       setBench(data.bench || [])
       setMatchDate(data.matchDate)
       setOpponent(data.opponent)
-      const f = formations.find(f => f.name === data.formation)
+      const f = formations.find(fm => fm.name === data.formation)
       if (f) setFormation(f)
     })
   }, [id])
@@ -57,22 +57,19 @@ export default function LineupEditor() {
     const playerId = active.id as string
     const target = over.id as string
 
-    // Remove from previous position
     const newPositions = { ...positions }
     Object.keys(newPositions).forEach(key => {
       if (newPositions[key] === playerId) delete newPositions[key]
     })
-    const newBench = bench.filter(id => id !== playerId)
+    const newBench = bench.filter(bId => bId !== playerId)
 
     if (target === 'bench') {
       newBench.push(playerId)
     } else if (target === 'available') {
-      // Dropped back to available — just remove
+      // dropped back
     } else {
-      // Dropped on a pitch position — swap if occupied
       const existing = newPositions[target]
       if (existing) {
-        // Find where dragged player was
         const prevPos = Object.keys(positions).find(k => positions[k] === playerId)
         if (prevPos) newPositions[prevPos] = existing
         else newBench.push(existing)
@@ -107,17 +104,15 @@ export default function LineupEditor() {
   const handleShare = async () => {
     if (!pitchRef.current) return
     try {
-      const dataUrl = await toPng(pitchRef.current, { backgroundColor: '#1a1a2e' })
+      const dataUrl = await toPng(pitchRef.current, { backgroundColor: '#0f0f0f', pixelRatio: 2 })
       const blob = await (await fetch(dataUrl)).blob()
       const file = new File([blob], `lineup-${matchDate}.png`, { type: 'image/png' })
 
       if (navigator.share) {
         await navigator.share({ text: `Lineup vs ${opponent} (${matchDate})`, files: [file] })
       } else {
-        // Fallback: open WhatsApp with text
         const url = `https://wa.me/?text=${encodeURIComponent(`Lineup vs ${opponent} (${matchDate})`)}`
         window.open(url, '_blank')
-        // Also download image
         const a = document.createElement('a')
         a.href = dataUrl
         a.download = `lineup-${matchDate}.png`
@@ -125,43 +120,53 @@ export default function LineupEditor() {
       }
     } catch (err) {
       console.error(err)
-      alert('Could not share. Try downloading the image.')
     }
   }
 
   const activePlayer = players.find(p => p.id === activeId)
 
   return (
-    <div style={{ padding: 20, maxWidth: 900, margin: '0 auto' }}>
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16, alignItems: 'center' }}>
+    <div style={{ padding: '24px', maxWidth: 960, margin: '0 auto' }}>
+      {/* Top controls */}
+      <div style={{
+        display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20, alignItems: 'center',
+        background: '#141414', padding: 16, borderRadius: 12, border: '1px solid #2a2a2a',
+      }}>
         <input type="date" value={matchDate} onChange={e => setMatchDate(e.target.value)} />
-        <input placeholder="Opponent" value={opponent} onChange={e => setOpponent(e.target.value)} style={{ width: 150 }} />
+        <input placeholder="Opponent" value={opponent} onChange={e => setOpponent(e.target.value)} style={{ width: 140 }} />
         <select value={formation.name} onChange={e => setFormation(formations.find(f => f.name === e.target.value)!)}>
           {formations.map(f => <option key={f.name}>{f.name}</option>)}
         </select>
-        <button onClick={handleSave} disabled={saving} style={{ background: '#4CAF50', color: '#fff' }}>
-          {saving ? 'Saving...' : '💾 Save'}
+        <div style={{ flex: 1 }} />
+        <button onClick={handleSave} disabled={saving} style={{ background: '#d32f2f', color: '#fff' }}>
+          {saving ? 'Saving...' : '💾 Save Lineup'}
         </button>
         <button onClick={handleShare} style={{ background: '#25D366', color: '#fff' }}>
-          📱 Share WhatsApp
+          📱 WhatsApp
         </button>
       </div>
 
       <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-          <div ref={pitchRef} style={{ flex: 1, minWidth: 320 }}>
+          {/* Pitch */}
+          <div ref={pitchRef} style={{ flex: 1, minWidth: 300 }}>
             <Pitch formation={formation} positions={positions} players={players} />
           </div>
 
-          <div style={{ width: 200, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <h3>Bench</h3>
-            <BenchArea bench={bench} players={players} />
+          {/* Sidebar */}
+          <div style={{ width: 220, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <h3 style={{ fontSize: 13, color: '#888', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Bench</h3>
+              <BenchArea bench={bench} players={players} />
+            </div>
 
-            <h3 style={{ marginTop: 12 }}>Available</h3>
-            <div id="available" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {availablePlayers.map(p => (
-                <PlayerJersey key={p.id} player={p} size="small" />
-              ))}
+            <div>
+              <h3 style={{ fontSize: 13, color: '#888', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Available ({availablePlayers.length})</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 400, overflowY: 'auto' }}>
+                {availablePlayers.map(p => (
+                  <PlayerJersey key={p.id} player={p} size="small" />
+                ))}
+              </div>
             </div>
           </div>
         </div>
