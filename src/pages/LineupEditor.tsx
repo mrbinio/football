@@ -4,7 +4,7 @@ import { db, auth } from '../firebase'
 import { Player, Lineup } from '../types'
 import { formations } from '../formations'
 import { useParams } from 'react-router-dom'
-import { DndContext, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core'
+import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, TouchSensor, MouseSensor, useSensor, useSensors } from '@dnd-kit/core'
 import Pitch from '../components/Pitch'
 import BenchArea from '../components/BenchArea'
 import PlayerJersey from '../components/PlayerJersey'
@@ -21,6 +21,14 @@ export default function LineupEditor() {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const pitchRef = useRef<HTMLDivElement>(null)
+
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: { delay: 150, tolerance: 5 },
+  })
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: { distance: 5 },
+  })
+  const sensors = useSensors(mouseSensor, touchSensor)
 
   useEffect(() => {
     return onSnapshot(collection(db, 'players'), (snap) => {
@@ -105,18 +113,24 @@ export default function LineupEditor() {
     if (!pitchRef.current) return
     try {
       const dataUrl = await toPng(pitchRef.current, { backgroundColor: '#0f0f0f', pixelRatio: 2 })
+      const blob = await (await fetch(dataUrl)).blob()
+      const file = new File([blob], `lineup-${matchDate}.png`, { type: 'image/png' })
 
-      // Always download the image
-      const a = document.createElement('a')
-      a.href = dataUrl
-      a.download = `lineup-vs-${opponent || 'TBD'}-${matchDate}.png`
-      a.click()
-
-      // Open WhatsApp with message
-      const text = `Lineup vs ${opponent || 'TBD'} (${matchDate})`
-      window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank')
-
-      alert('Image downloaded! Attach it in the WhatsApp chat that just opened.')
+      // Mobile: use native share with file
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          text: `Lineup vs ${opponent || 'TBD'} (${matchDate})`,
+          files: [file],
+        })
+      } else {
+        // Desktop: download + open WhatsApp Web
+        const a = document.createElement('a')
+        a.href = dataUrl
+        a.download = `lineup-vs-${opponent || 'TBD'}-${matchDate}.png`
+        a.click()
+        window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(`Lineup vs ${opponent || 'TBD'} (${matchDate})`)}`, '_blank')
+        alert('Image downloaded! Attach it in the WhatsApp chat.')
+      }
     } catch (err) {
       console.error(err)
     }
@@ -125,11 +139,14 @@ export default function LineupEditor() {
   const activePlayer = players.find(p => p.id === activeId)
 
   return (
-    <div style={{ padding: '24px', maxWidth: 960, margin: '0 auto' }}>
-      {/* Top controls */}
+    <div style={{ padding: '20px', maxWidth: 1000, margin: '0 auto' }}>
+      {/* Header bar */}
       <div style={{
         display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20, alignItems: 'center',
-        background: '#141414', padding: 16, borderRadius: 12, border: '1px solid #2a2a2a',
+        background: 'linear-gradient(135deg, #141414 0%, #1a1a1a 100%)',
+        padding: '16px 20px', borderRadius: 14,
+        border: '1px solid rgba(255,255,255,0.06)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
       }}>
         <input type="date" value={matchDate} onChange={e => setMatchDate(e.target.value)} />
         <input placeholder="Opponent" value={opponent} onChange={e => setOpponent(e.target.value)} style={{ width: 140 }} />
@@ -137,31 +154,50 @@ export default function LineupEditor() {
           {formations.map(f => <option key={f.name}>{f.name}</option>)}
         </select>
         <div style={{ flex: 1 }} />
-        <button onClick={handleSave} disabled={saving} style={{ background: '#d32f2f', color: '#fff' }}>
-          {saving ? 'Saving...' : '💾 Save Lineup'}
+        <button onClick={handleSave} disabled={saving} style={{
+          background: 'linear-gradient(135deg, #d32f2f, #b71c1c)',
+          color: '#fff', boxShadow: '0 2px 10px rgba(211,47,47,0.3)',
+        }}>
+          {saving ? 'Saving...' : '💾 Save'}
         </button>
-        <button onClick={handleShare} style={{ background: '#25D366', color: '#fff' }}>
-          📱 WhatsApp
+        <button onClick={handleShare} style={{
+          background: 'linear-gradient(135deg, #25D366, #128C7E)',
+          color: '#fff', boxShadow: '0 2px 10px rgba(37,211,102,0.3)',
+        }}>
+          📱 Share
         </button>
       </div>
 
-      <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
           {/* Pitch */}
           <div ref={pitchRef} style={{ flex: 1, minWidth: 300 }}>
             <Pitch formation={formation} positions={positions} players={players} />
           </div>
 
           {/* Sidebar */}
-          <div style={{ width: 220, display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div>
-              <h3 style={{ fontSize: 13, color: '#888', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Bench</h3>
+          <div style={{
+            width: 220, display: 'flex', flexDirection: 'column', gap: 16,
+            position: 'sticky', top: 80,
+          }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #141414, #1a1a1a)',
+              borderRadius: 14, padding: 14,
+              border: '1px solid rgba(255,255,255,0.06)',
+            }}>
+              <h3 style={{ fontSize: 11, color: '#666', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600 }}>Bench</h3>
               <BenchArea bench={bench} players={players} />
             </div>
 
-            <div>
-              <h3 style={{ fontSize: 13, color: '#888', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Available ({availablePlayers.length})</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 400, overflowY: 'auto' }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #141414, #1a1a1a)',
+              borderRadius: 14, padding: 14,
+              border: '1px solid rgba(255,255,255,0.06)',
+            }}>
+              <h3 style={{ fontSize: 11, color: '#666', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600 }}>
+                Available ({availablePlayers.length})
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 380, overflowY: 'auto' }}>
                 {availablePlayers.map(p => (
                   <PlayerJersey key={p.id} player={p} size="small" />
                 ))}
@@ -170,7 +206,7 @@ export default function LineupEditor() {
           </div>
         </div>
 
-        <DragOverlay>
+        <DragOverlay dropAnimation={null}>
           {activePlayer ? <PlayerJersey player={activePlayer} size="small" /> : null}
         </DragOverlay>
       </DndContext>
