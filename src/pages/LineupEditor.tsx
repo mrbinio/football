@@ -152,36 +152,23 @@ export default function LineupEditor() {
   const handleShare = async () => {
     if (!pitchRef.current) return
     try {
-      // Pre-load all images as base64 for screenshot
+      // Hide external images, show jersey fallback
       const images = pitchRef.current.querySelectorAll('img') as NodeListOf<HTMLImageElement>
-      const saved: { el: HTMLImageElement; original: string }[] = []
-
-      for (const img of images) {
+      const hidden: HTMLImageElement[] = []
+      images.forEach(img => {
         if (img.src && img.src.includes('firebasestorage')) {
-          try {
-            const res = await fetch(img.src)
-            const blob = await res.blob()
-            const b64 = await new Promise<string>((resolve) => {
-              const r = new FileReader()
-              r.onloadend = () => resolve(r.result as string)
-              r.readAsDataURL(blob)
-            })
-            saved.push({ el: img, original: img.src })
-            img.src = b64
-          } catch (_e) { /* skip */ }
+          img.style.display = 'none'
+          hidden.push(img)
         }
-      }
-
-      // Small delay to let images render
-      await new Promise(r => setTimeout(r, 100))
+      })
 
       const dataUrl = await toPng(pitchRef.current, {
         backgroundColor: '#111',
         pixelRatio: 2,
       })
 
-      // Restore original src
-      saved.forEach(({ el, original }) => { el.src = original })
+      // Restore images
+      hidden.forEach(img => { img.style.display = '' })
 
       const blob = await (await fetch(dataUrl)).blob()
       const file = new File([blob], `lineup-${matchDate}.png`, { type: 'image/png' })
