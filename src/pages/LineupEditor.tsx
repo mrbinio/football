@@ -152,7 +152,28 @@ export default function LineupEditor() {
   const handleShare = async () => {
     if (!pitchRef.current) return
     try {
-      // Temporarily disable 3D transform for screenshot
+      // Convert cross-origin images to base64 before screenshot
+      const images = pitchRef.current.querySelectorAll('img')
+      const originals: { img: HTMLImageElement; src: string }[] = []
+      for (const img of images) {
+        if (img.src && !img.src.startsWith('data:')) {
+          try {
+            const resp = await fetch(img.src, { mode: 'cors' })
+            const blob = await resp.blob()
+            const dataUrl = await new Promise<string>(resolve => {
+              const reader = new FileReader()
+              reader.onloadend = () => resolve(reader.result as string)
+              reader.readAsDataURL(blob)
+            })
+            originals.push({ img, src: img.src })
+            img.src = dataUrl
+          } catch {
+            // Skip if can't fetch
+          }
+        }
+      }
+
+      // Disable 3D for screenshot
       const pitchDiv = pitchRef.current.querySelector('[data-pitch]') as HTMLElement | null
       if (pitchDiv) pitchDiv.style.transform = 'none'
 
@@ -160,17 +181,11 @@ export default function LineupEditor() {
         backgroundColor: '#111',
         pixelRatio: 2,
         skipFonts: true,
-        filter: (node) => {
-          // Skip cross-origin images that would taint canvas
-          if (node instanceof HTMLImageElement && node.src && !node.src.startsWith('data:') && !node.src.startsWith(window.location.origin)) {
-            return false
-          }
-          return true
-        },
       })
 
-      // Restore 3D
+      // Restore
       if (pitchDiv) pitchDiv.style.transform = 'rotateX(4deg)'
+      originals.forEach(({ img, src }) => { img.src = src })
 
       const blob = await (await fetch(dataUrl)).blob()
       const file = new File([blob], `lineup-${matchDate}.png`, { type: 'image/png' })
