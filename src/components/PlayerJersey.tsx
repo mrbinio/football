@@ -16,23 +16,39 @@ export default function PlayerJersey({ player, size = 'small' }: Props) {
     alignItems: 'center',
     gap: 8,
     padding: size === 'small' ? '6px 10px' : 0,
-    background: size === 'small' ? '#0f3460' : 'transparent',
+    background: size === 'small' ? '#2a1010' : 'transparent',
     borderRadius: 6,
     userSelect: 'none',
     touchAction: 'none',
   }
 
+  // BP jersey: red and black vertical stripes
+  const jerseyIcon = (w: number, h: number) => (
+    <svg viewBox="0 0 40 44" width={w} height={h}>
+      {/* Jersey shape */}
+      <path d="M8 8 L20 2 L32 8 L34 30 L28 38 L12 38 L6 30 Z" fill="#d32f2f" stroke="#222" strokeWidth="1" />
+      {/* Black stripes */}
+      <clipPath id={`clip-${player.id}`}>
+        <path d="M8 8 L20 2 L32 8 L34 30 L28 38 L12 38 L6 30 Z" />
+      </clipPath>
+      <g clipPath={`url(#clip-${player.id})`}>
+        <rect x="12" y="0" width="4" height="44" fill="#111" />
+        <rect x="20" y="0" width="4" height="44" fill="#111" />
+        <rect x="28" y="0" width="4" height="44" fill="#111" />
+      </g>
+      {/* Number */}
+      <text x="20" y="26" textAnchor="middle" fill="#fff" fontSize="12" fontWeight="bold" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
+        {player.number}
+      </text>
+    </svg>
+  )
+
   if (size === 'pitch') {
     return (
       <div ref={setNodeRef} {...listeners} {...attributes} style={{ ...style, flexDirection: 'column', alignItems: 'center' }}>
-        <div style={{ position: 'relative', width: 36, height: 40 }}>
-          <svg viewBox="0 0 40 44" width="36" height="40">
-            <path d="M8 8 L20 2 L32 8 L34 30 L28 38 L12 38 L6 30 Z" fill="#1565C0" stroke="#fff" strokeWidth="1.5" />
-            <text x="20" y="26" textAnchor="middle" fill="#fff" fontSize="14" fontWeight="bold">{player.number}</text>
-          </svg>
-        </div>
-        <span style={{ fontSize: 10, fontWeight: 600, textAlign: 'center', maxWidth: 60, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {player.name.split(' ').pop()}
+        {jerseyIcon(36, 40)}
+        <span style={{ fontSize: 9, fontWeight: 600, textAlign: 'center', maxWidth: 70, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
+          {player.shirtName || player.name.split(' ').pop()}
         </span>
       </div>
     )
@@ -40,10 +56,8 @@ export default function PlayerJersey({ player, size = 'small' }: Props) {
 
   return (
     <div ref={setNodeRef} {...listeners} {...attributes} style={style}>
-      <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#4CAF50', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>
-        {player.number}
-      </div>
-      <span style={{ fontSize: 13 }}>{player.name}</span>
+      {jerseyIcon(24, 28)}
+      <span style={{ fontSize: 13 }}>{player.shirtName || player.name}</span>
     </div>
   )
 }

@@ -4,8 +4,8 @@ import { auth } from '../firebase'
 
 export default function Nav() {
   return (
-    <nav style={{ display: 'flex', gap: 16, padding: '12px 20px', background: '#16213e', alignItems: 'center' }}>
-      <Link to="/" style={{ color: '#4CAF50', textDecoration: 'none', fontWeight: 700 }}>⚽ Lineup</Link>
+    <nav style={{ display: 'flex', gap: 16, padding: '12px 20px', background: '#2a1010', alignItems: 'center', borderBottom: '2px solid #d32f2f' }}>
+      <Link to="/" style={{ color: '#d32f2f', textDecoration: 'none', fontWeight: 700 }}>⚽ Lineup</Link>
       <Link to="/players" style={{ color: '#fff', textDecoration: 'none' }}>Players</Link>
       <Link to="/lineups" style={{ color: '#fff', textDecoration: 'none' }}>Saved</Link>
       <div style={{ flex: 1 }} />

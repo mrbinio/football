@@ -3,6 +3,7 @@ export interface Player {
   name: string
   number: number
   position: string
+  shirtName: string
   photoURL?: string
 }
 
