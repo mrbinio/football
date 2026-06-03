@@ -1,3 +1,9 @@
 node_modules
 dist
 .firebase
+*.mov
+cors.json
+/sklad-*.jpeg
+/leon-bp.jpeg
+/intro-bp.jpg
+/screenshot.jpeg
