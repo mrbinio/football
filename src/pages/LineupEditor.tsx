@@ -462,12 +462,12 @@ export default function LineupEditor() {
                   if (!p) return null
                   const posLabel = formation.positions.find(fp => fp.key === posKey)?.label || posKey
                   const mins = playerMinutes[pId] || 0
+                  const hasNextIn = nextIn.length > 0
                   return (
-                    <div key={pId} onClick={() => handleRemoveFromPosition(pId)} style={{
+                    <div key={pId} style={{
                       display: 'flex', alignItems: 'center', gap: 8,
                       padding: '10px 12px', borderRadius: 10,
                       background: 'rgba(30,120,50,0.1)', border: '1px solid rgba(30,120,50,0.2)',
-                      cursor: 'pointer',
                     }}>
                       <div style={{
                         width: 28, height: 28, borderRadius: '50%',
@@ -475,8 +475,23 @@ export default function LineupEditor() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 8, fontWeight: 700, color: '#fff', flexShrink: 0,
                       }}>{posLabel}</div>
-                      <div style={{ fontSize: 11, fontWeight: 600, color: '#eee', flex: 1 }}>{p.shirtName}</div>
+                      <div onClick={() => handleRemoveFromPosition(pId)} style={{ fontSize: 11, fontWeight: 600, color: '#eee', flex: 1, cursor: 'pointer' }}>{p.shirtName}</div>
                       {mins > 0 && <span style={{ fontSize: 10, color: '#4CAF50', fontWeight: 600 }}>{mins}′</span>}
+                      {hasNextIn && (
+                        <button onClick={() => {
+                          const subIn = nextIn[0]
+                          // Swap: player out → bench, next-in → position
+                          const newPositions = { ...positions }
+                          newPositions[posKey] = subIn
+                          setPositions(newPositions)
+                          setBench(prev => [...prev.filter(b => b !== subIn), pId])
+                          setNextIn(prev => prev.filter(x => x !== subIn))
+                        }} style={{
+                          background: 'rgba(255,193,7,0.15)', color: '#FFC107',
+                          border: '1px solid rgba(255,193,7,0.3)',
+                          padding: '4px 8px', fontSize: 10, fontWeight: 700,
+                        }}>↔</button>
+                      )}
                     </div>
                   )
                 })}
