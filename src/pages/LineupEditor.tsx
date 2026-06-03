@@ -24,6 +24,7 @@ export default function LineupEditor() {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null)
+  const [nextIn, setNextIn] = useState<string[]>([])
   const pitchRef = useRef<HTMLDivElement>(null)
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
@@ -287,16 +288,18 @@ export default function LineupEditor() {
             onPositionTap={handlePositionTap} selectedPlayer={selectedPlayer}
           />
           {bench.length > 0 && (
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 10, padding: '10px', background: 'rgba(0,0,0,0.3)', borderRadius: 12 }}>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginTop: 10, padding: '10px', background: 'rgba(0,0,0,0.3)', borderRadius: 12 }}>
               {bench.map(bId => {
                 const p = players.find(pl => pl.id === bId)
                 if (!p) return null
+                const isNext = nextIn.includes(p.id)
                 return (
-                  <div key={p.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                  <div key={p.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, position: 'relative' }}>
+                    {isNext && <span style={{ position: 'absolute', top: -4, right: -4, fontSize: 10, color: '#FFC107' }}>★</span>}
                     {p.photoURL ? (
-                      <img src={p.photoURL} alt={p.name} style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover' }} />
+                      <img src={p.photoURL} alt={p.name} style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', border: isNext ? '2px solid #FFC107' : 'none' }} />
                     ) : (
-                      <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#d32f2f', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#fff' }}>{p.number}</div>
+                      <div style={{ width: 30, height: 30, borderRadius: '50%', background: isNext ? '#FFC107' : '#d32f2f', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: isNext ? '#000' : '#fff' }}>{p.number}</div>
                     )}
                     <span style={{ fontSize: 8, color: '#ccc' }}>{(p.shirtName || p.name).split(' ')[0]}</span>
                   </div>
@@ -363,26 +366,28 @@ export default function LineupEditor() {
 
           {bench.length > 0 && (
             <>
-              <h3 style={{ fontSize: 11, color: '#666', marginTop: 16, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5 }}>Bench</h3>
+              <h3 style={{ fontSize: 11, color: '#666', marginTop: 16, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5 }}>Bench <span style={{ color: '#444', fontWeight: 400 }}>· tap ★ = next in</span></h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 6 }}>
                 {bench.map(bId => {
                   const p = players.find(pl => pl.id === bId)
                   if (!p) return null
+                  const isNextIn = nextIn.includes(p.id)
                   return (
-                    <div key={p.id} onClick={() => handlePlayerTap(p.id)} style={{
+                    <div key={p.id} style={{
                       display: 'flex', alignItems: 'center', gap: 8,
                       padding: '10px 12px', borderRadius: 10,
-                      background: selectedPlayer === p.id ? 'rgba(211,47,47,0.15)' : 'rgba(255,255,255,0.03)',
-                      border: selectedPlayer === p.id ? '1px solid #d32f2f' : '1px solid rgba(255,255,255,0.06)',
+                      background: isNextIn ? 'rgba(255,193,7,0.08)' : selectedPlayer === p.id ? 'rgba(211,47,47,0.15)' : 'rgba(255,255,255,0.03)',
+                      border: isNextIn ? '1px solid rgba(255,193,7,0.3)' : selectedPlayer === p.id ? '1px solid #d32f2f' : '1px solid rgba(255,255,255,0.06)',
                       cursor: 'pointer',
                     }}>
-                      <div style={{
+                      <div onClick={() => handlePlayerTap(p.id)} style={{
                         width: 28, height: 28, borderRadius: '50%',
                         background: 'linear-gradient(135deg, #555, #333)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0,
                       }}>{p.number || '-'}</div>
-                      <div style={{ fontSize: 11, fontWeight: 600, color: '#eee' }}>{p.shirtName}</div>
+                      <div onClick={() => handlePlayerTap(p.id)} style={{ fontSize: 11, fontWeight: 600, color: '#eee', flex: 1 }}>{p.shirtName}</div>
+                      <span onClick={e => { e.stopPropagation(); setNextIn(prev => prev.includes(p.id) ? prev.filter(x => x !== p.id) : [...prev, p.id]) }} style={{ fontSize: 16, cursor: 'pointer', opacity: isNextIn ? 1 : 0.3 }}>★</span>
                     </div>
                   )
                 })}
@@ -432,10 +437,10 @@ export default function LineupEditor() {
           <button onClick={handleSave} disabled={saving} style={{ flex: 1, background: 'linear-gradient(135deg, #d32f2f, #9a0007)', color: '#fff', fontSize: 12, padding: '10px 0', boxShadow: '0 2px 12px rgba(211,47,47,0.2)' }}>
             {saving ? '...' : '💾 Save'}
           </button>
-          <button onClick={handleShare} style={{ flex: 1, background: 'linear-gradient(135deg, #1a1a1a, #111)', color: '#ccc', fontSize: 12, padding: '10px 0', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <button onClick={handleShare} style={{ flex: 1, background: 'linear-gradient(135deg, #25D366, #128C7E)', color: '#fff', fontSize: 12, padding: '10px 0', boxShadow: '0 2px 10px rgba(37,211,102,0.2)' }}>
             ⚽ Lineup
           </button>
-          <button onClick={handleShareSquad} style={{ flex: 1, background: 'linear-gradient(135deg, #1a1a1a, #111)', color: '#ccc', fontSize: 12, padding: '10px 0', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <button onClick={handleShareSquad} style={{ flex: 1, background: 'linear-gradient(135deg, #1565C0, #0D47A1)', color: '#fff', fontSize: 12, padding: '10px 0', boxShadow: '0 2px 10px rgba(21,101,192,0.2)' }}>
             📋 Squad
           </button>
         </div>
