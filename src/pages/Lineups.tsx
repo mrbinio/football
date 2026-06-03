@@ -6,7 +6,9 @@ import { useNavigate } from 'react-router-dom'
 
 export default function Lineups() {
   const [lineups, setLineups] = useState<Lineup[]>([])
-  const [editNotes, setEditNotes] = useState<string | null>(null)
+  const [editId, setEditId] = useState<string | null>(null)
+  const [title, setTitle] = useState('')
+  const [opponent, setOpponent] = useState('')
   const [notes, setNotes] = useState('')
   const [result, setResult] = useState('')
   const [scorers, setScorers] = useState('')
@@ -24,37 +26,41 @@ export default function Lineups() {
     if (confirm('Delete this lineup?')) deleteDoc(doc(db, 'lineups', id))
   }
 
-  const openNotes = (e: React.MouseEvent, l: Lineup) => {
+  const openEdit = (e: React.MouseEvent, l: Lineup) => {
     e.stopPropagation()
-    setEditNotes(l.id)
+    setEditId(l.id)
+    setTitle(l.title || '')
+    setOpponent(l.opponent || '')
     setNotes(l.notes || '')
     setResult(l.result || '')
     setScorers(l.scorers || '')
     setRating(l.rating || 0)
   }
 
-  const saveNotes = async () => {
-    if (!editNotes) return
-    await updateDoc(doc(db, 'lineups', editNotes), { notes, result, scorers, rating })
-    setEditNotes(null)
+  const saveEdit = async () => {
+    if (!editId) return
+    await updateDoc(doc(db, 'lineups', editId), { title, opponent, notes, result, scorers, rating })
+    setEditId(null)
   }
 
   return (
     <div style={{ padding: 24, maxWidth: 640, margin: '0 auto' }}>
       <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20 }}>Saved Lineups</h2>
 
-      {/* Notes modal */}
-      {editNotes && (
+      {/* Edit modal */}
+      {editId && (
         <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 200,
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 200,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-        }} onClick={() => setEditNotes(null)}>
+        }} onClick={() => setEditId(null)}>
           <div onClick={e => e.stopPropagation()} style={{
             background: '#1a1a1a', borderRadius: 16, padding: 24, width: '100%', maxWidth: 400,
             border: '1px solid rgba(255,255,255,0.08)',
           }}>
-            <h3 style={{ marginBottom: 16 }}>Match Notes</h3>
+            <h3 style={{ marginBottom: 16 }}>Edit Lineup</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <input placeholder="Title (e.g. Cup Round 2)" value={title} onChange={e => setTitle(e.target.value)} />
+              <input placeholder="Opponent" value={opponent} onChange={e => setOpponent(e.target.value)} />
               <input placeholder="Result (e.g. 3-1 W)" value={result} onChange={e => setResult(e.target.value)} />
               <input placeholder="Scorers (e.g. Biniarz x2, Hasani)" value={scorers} onChange={e => setScorers(e.target.value)} />
               <div>
@@ -64,7 +70,7 @@ export default function Lineups() {
                     <button key={n} onClick={() => setRating(n)} style={{
                       width: 36, height: 36, borderRadius: 8,
                       background: n <= rating ? '#d32f2f' : 'rgba(255,255,255,0.05)',
-                      color: n <= rating ? '#fff' : '#666', fontSize: 14,
+                      color: n <= rating ? '#fff' : '#555', fontSize: 14,
                       border: '1px solid rgba(255,255,255,0.1)',
                     }}>★</button>
                   ))}
@@ -79,7 +85,7 @@ export default function Lineups() {
                   background: 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 13, resize: 'vertical',
                 }}
               />
-              <button onClick={saveNotes} style={{ background: '#d32f2f', color: '#fff' }}>Save Notes</button>
+              <button onClick={saveEdit} style={{ background: '#d32f2f', color: '#fff' }}>Save Changes</button>
             </div>
           </div>
         </div>
@@ -89,8 +95,10 @@ export default function Lineups() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {lineups.map(l => (
           <div key={l.id} style={{
-            background: '#141414', padding: '14px 16px', borderRadius: 12,
-            border: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer', transition: 'border-color 0.2s',
+            background: 'linear-gradient(135deg, #141414, #1a1a1a)',
+            padding: '14px 16px', borderRadius: 12,
+            border: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer',
+            transition: 'border-color 0.2s',
           }} onClick={() => navigate(`/lineup/${l.id}`)}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{
@@ -107,7 +115,7 @@ export default function Lineups() {
                 </div>
                 {l.result && <div style={{ fontSize: 11, color: '#d32f2f', marginTop: 2 }}>Result: {l.result} {l.rating ? '★'.repeat(l.rating) : ''}</div>}
               </div>
-              <button onClick={e => openNotes(e, l)} style={{ background: 'rgba(255,255,255,0.05)', color: '#888', padding: '6px 10px', fontSize: 11, border: '1px solid rgba(255,255,255,0.08)' }}>📝</button>
+              <button onClick={e => openEdit(e, l)} style={{ background: 'rgba(255,255,255,0.05)', color: '#888', padding: '6px 10px', fontSize: 11, border: '1px solid rgba(255,255,255,0.08)' }}>✏️</button>
               <button onClick={e => handleDelete(e, l.id)} style={{ background: 'rgba(255,255,255,0.05)', color: '#d32f2f', padding: '6px 10px', fontSize: 11, border: '1px solid rgba(255,255,255,0.08)' }}>✕</button>
             </div>
           </div>

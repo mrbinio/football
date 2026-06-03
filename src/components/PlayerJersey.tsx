@@ -64,7 +64,23 @@ export default function PlayerJersey({ player, size = 'small' }: Props) {
 
     return (
       <div ref={setNodeRef} {...listeners} {...attributes} style={{ ...style, flexDirection: 'column', alignItems: 'center' }}>
-        <Jersey w={40} h={44} />
+        {player.photoURL ? (
+          <div style={{ position: 'relative' }}>
+            <img src={player.photoURL} alt={player.name} style={{
+              width: 42, height: 42, borderRadius: '50%', objectFit: 'cover',
+              border: '2px solid rgba(211,47,47,0.6)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
+            }} />
+            <div style={{
+              position: 'absolute', bottom: -2, right: -2,
+              width: 18, height: 18, borderRadius: '50%',
+              background: '#d32f2f', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 9, fontWeight: 700, color: '#fff', border: '1.5px solid #0a0a0a',
+            }}>{player.number}</div>
+          </div>
+        ) : (
+          <Jersey w={40} h={44} />
+        )}
         <span style={{
           fontSize: 10, fontWeight: 700, textAlign: 'center',
           color: '#fff',
