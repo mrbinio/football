@@ -152,13 +152,26 @@ export default function LineupEditor() {
   const handleShare = async () => {
     if (!pitchRef.current) return
     try {
+      // Temporarily disable 3D transform for screenshot
+      const pitchDiv = pitchRef.current.querySelector('[data-pitch]') as HTMLElement | null
+      if (pitchDiv) pitchDiv.style.transform = 'none'
+
       const dataUrl = await toPng(pitchRef.current, {
         backgroundColor: '#111',
         pixelRatio: 2,
         skipFonts: true,
-        cacheBust: true,
-        fetchRequestInit: { mode: 'cors' },
+        filter: (node) => {
+          // Skip cross-origin images that would taint canvas
+          if (node instanceof HTMLImageElement && node.src && !node.src.startsWith('data:') && !node.src.startsWith(window.location.origin)) {
+            return false
+          }
+          return true
+        },
       })
+
+      // Restore 3D
+      if (pitchDiv) pitchDiv.style.transform = 'rotateX(4deg)'
+
       const blob = await (await fetch(dataUrl)).blob()
       const file = new File([blob], `lineup-${matchDate}.png`, { type: 'image/png' })
       if (navigator.canShare && navigator.canShare({ files: [file] })) {

@@ -13,7 +13,7 @@ interface Props {
 export default function Pitch({ formation, positions, players, onPositionTap, selectedPlayer }: Props) {
   return (
     <div style={{ perspective: '800px' }}>
-      <div style={{
+      <div data-pitch style={{
         position: 'relative', width: '100%', paddingBottom: '140%',
         borderRadius: 18, overflow: 'hidden',
         background: 'linear-gradient(180deg, #15572a 0%, #1d7a36 25%, #22913e 50%, #1d7a36 75%, #15572a 100%)',
