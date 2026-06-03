@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect, useCallback } from 'react'
-import { onAuthStateChanged, User, signOut, getRedirectResult } from 'firebase/auth'
+import { onAuthStateChanged, User, signOut } from 'firebase/auth'
 import { auth } from './firebase'
 import { seedPlayers } from './seed'
 import { isAuthorized } from './coaches'
@@ -17,7 +17,6 @@ export default function App() {
   const [showIntro, setShowIntro] = useState(false)
 
   useEffect(() => {
-    getRedirectResult(auth).catch(() => {})
     return onAuthStateChanged(auth, (u) => {
       if (u && !user) {
         setShowIntro(true)

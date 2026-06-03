@@ -1,4 +1,4 @@
-import { signInWithRedirect, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth'
+import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth'
 import { auth } from '../firebase'
 import { useState } from 'react'
 
@@ -12,7 +12,7 @@ export default function Login() {
   const [resetEmail, setResetEmail] = useState('')
 
   const handleGoogle = () => {
-    signInWithRedirect(auth, new GoogleAuthProvider())
+    signInWithPopup(auth, new GoogleAuthProvider()).catch(e => setError(e.message))
   }
 
   const handleEmail = async (e: React.FormEvent) => {
