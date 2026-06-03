@@ -55,10 +55,9 @@ export default function PlayerJersey({ player, size = 'small' }: Props) {
       <div ref={setNodeRef} {...listeners} {...attributes} style={{ ...style, flexDirection: 'column', alignItems: 'center' }}>
         <Jersey w={38} h={42} />
         <span style={{
-          fontSize: 9, fontWeight: 700, textAlign: 'center',
-          maxWidth: 72, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.9)',
-          marginTop: 2,
+          fontSize: 8, fontWeight: 700, textAlign: 'center',
+          maxWidth: 90, color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.9)',
+          marginTop: 2, lineHeight: 1.2, wordBreak: 'break-word',
         }}>
           {player.shirtName || player.name.split(' ').pop()}
         </span>
