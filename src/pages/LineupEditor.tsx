@@ -8,6 +8,7 @@ import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, MouseSensor, use
 import Pitch from '../components/Pitch'
 import BenchArea from '../components/BenchArea'
 import PlayerJersey from '../components/PlayerJersey'
+import SquadCard from '../components/SquadCard'
 import { getCoachName } from '../coaches'
 import html2canvas from 'html2canvas'
 
@@ -25,6 +26,7 @@ export default function LineupEditor() {
   const [saving, setSaving] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null)
   const pitchRef = useRef<HTMLDivElement>(null)
+  const squadRef = useRef<HTMLDivElement>(null)
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 5 } })
@@ -176,6 +178,34 @@ export default function LineupEditor() {
     }
   }
 
+  const handleShareSquad = async () => {
+    if (!squadRef.current) return
+    try {
+      const canvas = await html2canvas(squadRef.current, {
+        backgroundColor: '#0f0f0f',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+      })
+      const dataUrl = canvas.toDataURL('image/png')
+      const blob = await (await fetch(dataUrl)).blob()
+      const file = new File([blob], `squad-${matchDate}.png`, { type: 'image/png' })
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ text: `Squad vs ${opponent || 'TBD'} (${matchDate})`, files: [file] })
+      } else {
+        const a = document.createElement('a')
+        a.href = dataUrl
+        a.download = `squad-vs-${opponent || 'TBD'}-${matchDate}.png`
+        a.click()
+        window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(`Squad vs ${opponent || 'TBD'} (${matchDate})`)}`, '_blank')
+      }
+    } catch (err) {
+      console.error('Share squad error:', err)
+      alert('Could not generate image.')
+    }
+  }
+
+  const calledUpIds = [...Object.values(positions), ...bench]
   const activePlayer = players.find(p => p.id === activeId)
 
   // --- MOBILE LAYOUT ---
@@ -218,6 +248,24 @@ export default function LineupEditor() {
             formation={formation} positions={positions} players={players}
             onPositionTap={handlePositionTap} selectedPlayer={selectedPlayer}
           />
+          {bench.length > 0 && (
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 10, padding: '10px', background: 'rgba(0,0,0,0.3)', borderRadius: 12 }}>
+              {bench.map(bId => {
+                const p = players.find(pl => pl.id === bId)
+                if (!p) return null
+                return (
+                  <div key={p.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                    {p.photoURL ? (
+                      <img src={p.photoURL} alt={p.name} style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#d32f2f', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#fff' }}>{p.number}</div>
+                    )}
+                    <span style={{ fontSize: 8, color: '#ccc' }}>{(p.shirtName || p.name).split(' ')[0]}</span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         {/* Players list below pitch */}
@@ -312,19 +360,34 @@ export default function LineupEditor() {
           )}
         </div>
 
+        {/* Hidden squad card for screenshot */}
+        <div ref={squadRef} style={{ position: 'absolute', left: '-9999px', top: 0 }}>
+          <SquadCard
+            players={players}
+            calledUpIds={calledUpIds}
+            matchDate={matchDate}
+            opponent={opponent}
+            title={title}
+            coachName={getCoachName(auth.currentUser?.email || '')}
+          />
+        </div>
+
         {/* Floating action bar */}
         <div style={{
           position: 'fixed', bottom: 0, left: 0, right: 0,
-          display: 'flex', gap: 10, padding: '12px 16px',
+          display: 'flex', gap: 8, padding: '12px 16px',
           background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(10px)',
           borderTop: '1px solid rgba(255,255,255,0.08)',
           zIndex: 100,
         }}>
           <button onClick={handleSave} disabled={saving} style={{ flex: 1, background: 'linear-gradient(135deg, #d32f2f, #b71c1c)', color: '#fff' }}>
-            {saving ? 'Saving...' : '💾 Save Lineup'}
+            {saving ? '...' : '💾 Save'}
           </button>
           <button onClick={handleShare} style={{ flex: 1, background: 'linear-gradient(135deg, #25D366, #128C7E)', color: '#fff' }}>
-            📱 Share WhatsApp
+            ⚽ Lineup
+          </button>
+          <button onClick={handleShareSquad} style={{ flex: 1, background: 'linear-gradient(135deg, #1565C0, #0D47A1)', color: '#fff' }}>
+            📋 Squad
           </button>
         </div>
       </div>
@@ -354,7 +417,10 @@ export default function LineupEditor() {
           {saving ? 'Saving...' : '💾 Save'}
         </button>
         <button onClick={handleShare} style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)', color: '#fff', boxShadow: '0 2px 10px rgba(37,211,102,0.3)' }}>
-          📱 Share
+          ⚽ Lineup
+        </button>
+        <button onClick={handleShareSquad} style={{ background: 'linear-gradient(135deg, #1565C0, #0D47A1)', color: '#fff', boxShadow: '0 2px 10px rgba(21,101,192,0.3)' }}>
+          📋 Squad
         </button>
       </div>
 
@@ -380,6 +446,18 @@ export default function LineupEditor() {
           {activePlayer ? <PlayerJersey player={activePlayer} size="small" /> : null}
         </DragOverlay>
       </DndContext>
+
+      {/* Hidden squad card for screenshot */}
+      <div ref={squadRef} style={{ position: 'absolute', left: '-9999px', top: 0 }}>
+        <SquadCard
+          players={players}
+          calledUpIds={calledUpIds}
+          matchDate={matchDate}
+          opponent={opponent}
+          title={title}
+          coachName={getCoachName(auth.currentUser?.email || '')}
+        />
+      </div>
     </div>
   )
 }
