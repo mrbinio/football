@@ -152,16 +152,18 @@ export default function LineupEditor() {
   const handleShare = async () => {
     if (!pitchRef.current) return
     try {
-      // Disable 3D for screenshot
       const pitchDiv = pitchRef.current.querySelector('[data-pitch]') as HTMLElement | null
       if (pitchDiv) pitchDiv.style.transform = 'none'
 
       const dataUrl = await toPng(pitchRef.current, {
         backgroundColor: '#111',
         pixelRatio: 2,
+        filter: (node) => {
+          if (node instanceof HTMLImageElement && node.src && node.src.includes('firebasestorage')) return false
+          return true
+        },
       })
 
-      // Restore 3D
       if (pitchDiv) pitchDiv.style.transform = 'rotateX(4deg)'
 
       const blob = await (await fetch(dataUrl)).blob()
@@ -177,7 +179,7 @@ export default function LineupEditor() {
       }
     } catch (err) {
       console.error('Share error:', err)
-      alert('Could not generate image. Try on a different browser or device.')
+      alert('Could not generate image.')
     }
   }
 

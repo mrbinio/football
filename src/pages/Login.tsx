@@ -1,4 +1,4 @@
-import { signInWithPopup, signInWithRedirect, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth'
+import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth'
 import { auth } from '../firebase'
 import { useState } from 'react'
 
@@ -11,16 +11,8 @@ export default function Login() {
   const [showReset, setShowReset] = useState(false)
   const [resetEmail, setResetEmail] = useState('')
 
-  const handleGoogle = async () => {
-    try {
-      await signInWithPopup(auth, new GoogleAuthProvider())
-    } catch (e: unknown) {
-      if (e instanceof Error && e.message.includes('popup')) {
-        signInWithRedirect(auth, new GoogleAuthProvider())
-      } else {
-        setError(e instanceof Error ? e.message : 'Login failed')
-      }
-    }
+  const handleGoogle = () => {
+    signInWithPopup(auth, new GoogleAuthProvider()).catch(e => setError(e.message))
   }
 
   const handleEmail = async (e: React.FormEvent) => {

@@ -66,7 +66,7 @@ export default function PlayerJersey({ player, size = 'small' }: Props) {
       <div ref={setNodeRef} {...listeners} {...attributes} style={{ ...style, flexDirection: 'column', alignItems: 'center' }}>
         {player.photoURL ? (
           <div style={{ position: 'relative' }}>
-            <img crossOrigin="anonymous" src={player.photoURL} alt={player.name} style={{
+            <img src={player.photoURL} alt={player.name} style={{
               width: 42, height: 42, borderRadius: '50%', objectFit: 'cover',
               border: '2px solid rgba(211,47,47,0.6)',
               boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
