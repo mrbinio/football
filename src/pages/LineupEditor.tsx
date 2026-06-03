@@ -8,7 +8,6 @@ import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, MouseSensor, use
 import Pitch from '../components/Pitch'
 import BenchArea from '../components/BenchArea'
 import PlayerJersey from '../components/PlayerJersey'
-import SquadCard from '../components/SquadCard'
 import { getCoachName } from '../coaches'
 import html2canvas from 'html2canvas'
 
@@ -26,7 +25,6 @@ export default function LineupEditor() {
   const [saving, setSaving] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null)
   const pitchRef = useRef<HTMLDivElement>(null)
-  const squadRef = useRef<HTMLDivElement>(null)
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 5 } })
@@ -179,15 +177,66 @@ export default function LineupEditor() {
   }
 
   const handleShareSquad = async () => {
-    if (!squadRef.current) return
+    // Create temporary visible element for html2canvas
+    const container = document.createElement('div')
+    container.style.position = 'fixed'
+    container.style.top = '0'
+    container.style.left = '0'
+    container.style.zIndex = '-1'
+    container.style.opacity = '0.01'
+    document.body.appendChild(container)
+
+    // Render squad card into container
+    const { createRoot } = await import('react-dom/client')
+    const root = createRoot(container)
+    const cardEl = document.createElement('div')
+    container.appendChild(cardEl)
+
+    // Build card HTML manually for html2canvas
+    const calledUp = players.filter(p => calledUpIds.includes(p.id)).sort((a, b) => a.number - b.number)
+    const coachName = getCoachName(auth.currentUser?.email || '')
+
+    cardEl.innerHTML = `
+      <div style="width:400px;padding:24px;border-radius:16px;background:linear-gradient(160deg,#1a0a0a,#0f0f0f,#1a0a0a);border:1px solid rgba(211,47,47,0.3);font-family:Inter,sans-serif;">
+        <div style="text-align:center;margin-bottom:20px;">
+          <div style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#d32f2f,#b71c1c);padding:6px 16px;border-radius:20px;margin-bottom:12px;">
+            <span style="font-size:11px;font-weight:700;color:#fff;letter-spacing:2px;text-transform:uppercase;">Matchday Squad</span>
+          </div>
+          <h2 style="font-size:18px;font-weight:700;color:#fff;margin:8px 0 4px;">${title || `vs ${opponent || 'TBD'}`}</h2>
+          <p style="font-size:12px;color:#888;">${matchDate}</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;">
+          ${calledUp.map(p => `
+            <div style="display:flex;flex-direction:column;align-items:center;padding:10px 4px;background:rgba(255,255,255,0.03);border-radius:10px;border:1px solid rgba(255,255,255,0.06);">
+              ${p.photoURL
+                ? `<img src="${p.photoURL}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(211,47,47,0.4);margin-bottom:6px;" />`
+                : `<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#d32f2f,#b71c1c);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;margin-bottom:6px;">${p.number}</div>`
+              }
+              <span style="font-size:10px;font-weight:600;color:#eee;text-align:center;">${p.shirtName || p.name.split(' ').pop()}</span>
+              <span style="font-size:9px;color:#666;">#${p.number}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div style="text-align:center;border-top:1px solid rgba(255,255,255,0.06);padding-top:12px;">
+          <p style="font-size:10px;color:#666;">Coach: ${coachName}</p>
+          <p style="font-size:9px;color:#444;margin-top:4px;">BP · BrommaPojkarna P18-8</p>
+        </div>
+      </div>
+    `
+
+    root.unmount()
+
     try {
-      const canvas = await html2canvas(squadRef.current, {
+      await new Promise(r => setTimeout(r, 200))
+      const canvas = await html2canvas(cardEl, {
         backgroundColor: '#0f0f0f',
         scale: 2,
         useCORS: true,
         allowTaint: true,
       })
       const dataUrl = canvas.toDataURL('image/png')
+      document.body.removeChild(container)
+
       const blob = await (await fetch(dataUrl)).blob()
       const file = new File([blob], `squad-${matchDate}.png`, { type: 'image/png' })
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -201,6 +250,7 @@ export default function LineupEditor() {
       }
     } catch (err) {
       console.error('Share squad error:', err)
+      document.body.removeChild(container)
       alert('Could not generate image.')
     }
   }
@@ -228,29 +278,6 @@ export default function LineupEditor() {
           </select>
         </div>
 
-        {/* Selected player indicator */}
-        {selectedPlayer && (
-          <div style={{
-            background: 'rgba(211,47,47,0.15)', border: '1px solid rgba(211,47,47,0.3)',
-            borderRadius: 10, padding: '10px 14px', marginBottom: 12,
-            display: 'flex', alignItems: 'center', gap: 8,
-          }}>
-            <span style={{ fontSize: 12, color: '#eee', flex: 1 }}>
-              <strong>{players.find(p => p.id === selectedPlayer)?.shirtName}</strong> → tap position or:
-            </span>
-            <button onClick={() => {
-              if (selectedPlayer && !bench.includes(selectedPlayer)) {
-                const newPositions = { ...positions }
-                Object.keys(newPositions).forEach(k => { if (newPositions[k] === selectedPlayer) delete newPositions[k] })
-                setPositions(newPositions)
-                setBench([...bench.filter(b => b !== selectedPlayer), selectedPlayer])
-              }
-              setSelectedPlayer(null)
-            }} style={{ background: '#1565C0', color: '#fff', padding: '4px 10px', fontSize: 11 }}>Bench</button>
-            <button onClick={() => setSelectedPlayer(null)} style={{ background: '#333', color: '#fff', padding: '4px 10px', fontSize: 11 }}>Cancel</button>
-          </div>
-        )}
-
         {/* Pitch - full width */}
         <div ref={pitchRef}>
           <Pitch
@@ -276,6 +303,29 @@ export default function LineupEditor() {
             </div>
           )}
         </div>
+
+        {/* Selected player indicator - below pitch */}
+        {selectedPlayer && (
+          <div style={{
+            background: 'rgba(211,47,47,0.15)', border: '1px solid rgba(211,47,47,0.3)',
+            borderRadius: 10, padding: '10px 14px', marginTop: 12,
+            display: 'flex', alignItems: 'center', gap: 8,
+          }}>
+            <span style={{ fontSize: 12, color: '#eee', flex: 1 }}>
+              <strong>{players.find(p => p.id === selectedPlayer)?.shirtName}</strong> →
+            </span>
+            <button onClick={() => {
+              if (selectedPlayer && !bench.includes(selectedPlayer)) {
+                const newPositions = { ...positions }
+                Object.keys(newPositions).forEach(k => { if (newPositions[k] === selectedPlayer) delete newPositions[k] })
+                setPositions(newPositions)
+                setBench([...bench.filter(b => b !== selectedPlayer), selectedPlayer])
+              }
+              setSelectedPlayer(null)
+            }} style={{ background: '#1565C0', color: '#fff', padding: '6px 12px', fontSize: 11 }}>+ Bench</button>
+            <button onClick={() => setSelectedPlayer(null)} style={{ background: '#333', color: '#fff', padding: '6px 12px', fontSize: 11 }}>Cancel</button>
+          </div>
+        )}
 
         {/* Players list below pitch */}
         <div style={{ marginTop: 20 }}>
@@ -369,18 +419,6 @@ export default function LineupEditor() {
           )}
         </div>
 
-        {/* Hidden squad card for screenshot */}
-        <div ref={squadRef} style={{ position: 'absolute', left: '-9999px', top: 0 }}>
-          <SquadCard
-            players={players}
-            calledUpIds={calledUpIds}
-            matchDate={matchDate}
-            opponent={opponent}
-            title={title}
-            coachName={getCoachName(auth.currentUser?.email || '')}
-          />
-        </div>
-
         {/* Floating action bar */}
         <div style={{
           position: 'fixed', bottom: 0, left: 0, right: 0,
@@ -456,17 +494,6 @@ export default function LineupEditor() {
         </DragOverlay>
       </DndContext>
 
-      {/* Hidden squad card for screenshot */}
-      <div ref={squadRef} style={{ position: 'absolute', left: '-9999px', top: 0 }}>
-        <SquadCard
-          players={players}
-          calledUpIds={calledUpIds}
-          matchDate={matchDate}
-          opponent={opponent}
-          title={title}
-          coachName={getCoachName(auth.currentUser?.email || '')}
-        />
-      </div>
     </div>
   )
 }
