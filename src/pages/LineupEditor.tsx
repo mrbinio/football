@@ -8,6 +8,7 @@ import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, MouseSensor, use
 import Pitch from '../components/Pitch'
 import BenchArea from '../components/BenchArea'
 import PlayerJersey from '../components/PlayerJersey'
+import { getCoachName } from '../coaches'
 import { toPng } from 'html-to-image'
 
 export default function LineupEditor() {
@@ -18,6 +19,7 @@ export default function LineupEditor() {
   const [bench, setBench] = useState<string[]>([])
   const [matchDate, setMatchDate] = useState(new Date().toISOString().split('T')[0])
   const [opponent, setOpponent] = useState('')
+  const [title, setTitle] = useState('')
   const [activeId, setActiveId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null)
@@ -42,6 +44,7 @@ export default function LineupEditor() {
       setBench(data.bench || [])
       setMatchDate(data.matchDate)
       setOpponent(data.opponent)
+      if (data.title) setTitle(data.title)
       const f = formations.find(fm => fm.name === data.formation)
       if (f) setFormation(f)
     })
@@ -130,9 +133,10 @@ export default function LineupEditor() {
   const handleSave = async () => {
     setSaving(true)
     const data = {
-      matchDate, opponent, formation: formation.name,
+      matchDate, opponent, title, formation: formation.name,
       positions, bench,
       createdBy: auth.currentUser?.email || '',
+      createdByName: getCoachName(auth.currentUser?.email || ''),
       createdAt: Date.now(),
     }
     if (id) await updateDoc(doc(db, 'lineups', id), data)
@@ -171,6 +175,7 @@ export default function LineupEditor() {
           <input placeholder="Opponent" value={opponent} onChange={e => setOpponent(e.target.value)} style={{ flex: 1, minWidth: 100 }} />
         </div>
         <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          <input placeholder="Title (e.g. Cup Round 2)" value={title} onChange={e => setTitle(e.target.value)} style={{ flex: 1 }} />
           <select value={formation.name} onChange={e => setFormation(formations.find(f => f.name === e.target.value)!)} style={{ flex: 1 }}>
             {formations.map(f => <option key={f.name}>{f.name}</option>)}
           </select>
@@ -309,6 +314,7 @@ export default function LineupEditor() {
       }}>
         <input type="date" value={matchDate} onChange={e => setMatchDate(e.target.value)} />
         <input placeholder="Opponent" value={opponent} onChange={e => setOpponent(e.target.value)} style={{ width: 140 }} />
+        <input placeholder="Title (e.g. Cup Round 2)" value={title} onChange={e => setTitle(e.target.value)} style={{ width: 160 }} />
         <select value={formation.name} onChange={e => setFormation(formations.find(f => f.name === e.target.value)!)}>
           {formations.map(f => <option key={f.name}>{f.name}</option>)}
         </select>
