@@ -68,7 +68,7 @@ export default function Players() {
   }
 
   return (
-    <div style={{ padding: 20, maxWidth: 640, margin: '0 auto' }}>
+    <div style={{ padding: 20, paddingBottom: 80, maxWidth: 640, margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, flex: 1 }}>Squad</h2>
         <button onClick={openAdd} style={{ background: '#d32f2f', color: '#fff' }}>+ Add Player</button>

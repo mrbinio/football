@@ -258,7 +258,7 @@ export default function LineupEditor() {
   // --- MOBILE LAYOUT ---
   if (isMobile) {
     return (
-      <div style={{ padding: '16px', paddingBottom: 80, maxWidth: 500, margin: '0 auto' }}>
+      <div style={{ padding: '16px', paddingBottom: 140, maxWidth: 500, margin: '0 auto' }}>
         {/* Controls */}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
           <input type="date" value={matchDate} onChange={e => setMatchDate(e.target.value)} style={{ flex: 1, minWidth: 120 }} />
@@ -418,10 +418,10 @@ export default function LineupEditor() {
 
         {/* Floating action bar */}
         <div style={{
-          position: 'fixed', bottom: 0, left: 0, right: 0,
-          display: 'flex', gap: 8, padding: '12px 16px',
-          background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(10px)',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
+          position: 'fixed', bottom: 56, left: 0, right: 0,
+          display: 'flex', gap: 8, padding: '10px 16px',
+          background: 'rgba(10,10,10,0.97)', backdropFilter: 'blur(10px)',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
           zIndex: 100,
         }}>
           <button onClick={handleSave} disabled={saving} style={{ flex: 1, background: 'linear-gradient(135deg, #d32f2f, #b71c1c)', color: '#fff' }}>
