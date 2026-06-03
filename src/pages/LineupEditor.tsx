@@ -177,39 +177,33 @@ export default function LineupEditor() {
   }
 
   const handleShareSquad = async () => {
-    // Create temporary visible element for html2canvas
+    const calledUp = players.filter(p => calledUpIds.includes(p.id)).sort((a, b) => a.number - b.number)
+    if (calledUp.length === 0) { alert('No players selected'); return }
+    const coachName = getCoachName(auth.currentUser?.email || '')
+
     const container = document.createElement('div')
     container.style.position = 'fixed'
     container.style.top = '0'
     container.style.left = '0'
-    container.style.zIndex = '-1'
+    container.style.zIndex = '9999'
+    container.style.pointerEvents = 'none'
     container.style.opacity = '0.01'
     document.body.appendChild(container)
 
-    // Render squad card into container
-    const { createRoot } = await import('react-dom/client')
-    const root = createRoot(container)
-    const cardEl = document.createElement('div')
-    container.appendChild(cardEl)
-
-    // Build card HTML manually for html2canvas
-    const calledUp = players.filter(p => calledUpIds.includes(p.id)).sort((a, b) => a.number - b.number)
-    const coachName = getCoachName(auth.currentUser?.email || '')
-
-    cardEl.innerHTML = `
-      <div style="width:400px;padding:24px;border-radius:16px;background:linear-gradient(160deg,#1a0a0a,#0f0f0f,#1a0a0a);border:1px solid rgba(211,47,47,0.3);font-family:Inter,sans-serif;">
+    container.innerHTML = `
+      <div id="squad-capture" style="width:400px;padding:24px;border-radius:16px;background:linear-gradient(160deg,#1a0a0a 0%,#0f0f0f 50%,#1a0a0a 100%);border:1px solid rgba(211,47,47,0.3);font-family:Inter,sans-serif;">
         <div style="text-align:center;margin-bottom:20px;">
-          <div style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#d32f2f,#b71c1c);padding:6px 16px;border-radius:20px;margin-bottom:12px;">
+          <div style="display:inline-block;background:linear-gradient(135deg,#d32f2f,#b71c1c);padding:6px 16px;border-radius:20px;margin-bottom:12px;">
             <span style="font-size:11px;font-weight:700;color:#fff;letter-spacing:2px;text-transform:uppercase;">Matchday Squad</span>
           </div>
           <h2 style="font-size:18px;font-weight:700;color:#fff;margin:8px 0 4px;">${title || `vs ${opponent || 'TBD'}`}</h2>
-          <p style="font-size:12px;color:#888;">${matchDate}</p>
+          <p style="font-size:12px;color:#888;margin:0;">${matchDate}</p>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;">
           ${calledUp.map(p => `
             <div style="display:flex;flex-direction:column;align-items:center;padding:10px 4px;background:rgba(255,255,255,0.03);border-radius:10px;border:1px solid rgba(255,255,255,0.06);">
               ${p.photoURL
-                ? `<img src="${p.photoURL}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(211,47,47,0.4);margin-bottom:6px;" />`
+                ? `<img src="${p.photoURL}" crossorigin="anonymous" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(211,47,47,0.4);margin-bottom:6px;" />`
                 : `<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#d32f2f,#b71c1c);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;margin-bottom:6px;">${p.number}</div>`
               }
               <span style="font-size:10px;font-weight:600;color:#eee;text-align:center;">${p.shirtName || p.name.split(' ').pop()}</span>
@@ -218,25 +212,28 @@ export default function LineupEditor() {
           `).join('')}
         </div>
         <div style="text-align:center;border-top:1px solid rgba(255,255,255,0.06);padding-top:12px;">
-          <p style="font-size:10px;color:#666;">Coach: ${coachName}</p>
+          <p style="font-size:10px;color:#666;margin:0;">Coach: ${coachName}</p>
           <p style="font-size:9px;color:#444;margin-top:4px;">BP · BrommaPojkarna P18-8</p>
         </div>
       </div>
     `
 
-    root.unmount()
-
     try {
-      await new Promise(r => setTimeout(r, 200))
-      const canvas = await html2canvas(cardEl, {
+      // Wait for images to load
+      const imgs = container.querySelectorAll('img')
+      await Promise.all(Array.from(imgs).map(img => new Promise(r => { img.onload = r; img.onerror = r; if (img.complete) r(null) })))
+      await new Promise(r => setTimeout(r, 300))
+
+      const target = container.querySelector('#squad-capture') as HTMLElement
+      const canvas = await html2canvas(target, {
         backgroundColor: '#0f0f0f',
         scale: 2,
         useCORS: true,
         allowTaint: true,
       })
-      const dataUrl = canvas.toDataURL('image/png')
       document.body.removeChild(container)
 
+      const dataUrl = canvas.toDataURL('image/png')
       const blob = await (await fetch(dataUrl)).blob()
       const file = new File([blob], `squad-${matchDate}.png`, { type: 'image/png' })
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -251,7 +248,7 @@ export default function LineupEditor() {
     } catch (err) {
       console.error('Share squad error:', err)
       document.body.removeChild(container)
-      alert('Could not generate image.')
+      alert('Could not generate squad image.')
     }
   }
 
