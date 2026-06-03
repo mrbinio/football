@@ -233,11 +233,20 @@ export default function LineupEditor() {
           <div style={{
             background: 'rgba(211,47,47,0.15)', border: '1px solid rgba(211,47,47,0.3)',
             borderRadius: 10, padding: '10px 14px', marginBottom: 12,
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            display: 'flex', alignItems: 'center', gap: 8,
           }}>
-            <span style={{ fontSize: 13, color: '#eee' }}>
-              Tap a position for: <strong>{players.find(p => p.id === selectedPlayer)?.shirtName}</strong>
+            <span style={{ fontSize: 12, color: '#eee', flex: 1 }}>
+              <strong>{players.find(p => p.id === selectedPlayer)?.shirtName}</strong> → tap position or:
             </span>
+            <button onClick={() => {
+              if (selectedPlayer && !bench.includes(selectedPlayer)) {
+                const newPositions = { ...positions }
+                Object.keys(newPositions).forEach(k => { if (newPositions[k] === selectedPlayer) delete newPositions[k] })
+                setPositions(newPositions)
+                setBench([...bench.filter(b => b !== selectedPlayer), selectedPlayer])
+              }
+              setSelectedPlayer(null)
+            }} style={{ background: '#1565C0', color: '#fff', padding: '4px 10px', fontSize: 11 }}>Bench</button>
             <button onClick={() => setSelectedPlayer(null)} style={{ background: '#333', color: '#fff', padding: '4px 10px', fontSize: 11 }}>Cancel</button>
           </div>
         )}
