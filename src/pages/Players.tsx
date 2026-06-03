@@ -12,6 +12,7 @@ export default function Players() {
   const [position, setPosition] = useState('CM')
   const [editId, setEditId] = useState<string | null>(null)
   const [photo, setPhoto] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     return onSnapshot(collection(db, 'players'), (snap) => {
@@ -21,24 +22,31 @@ export default function Players() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    let photoURL: string | undefined
+    setUploading(true)
+    try {
+      let photoURL: string | undefined
 
-    if (photo) {
-      const storageRef = ref(storage, `players/${Date.now()}_${photo.name}`)
-      await uploadBytes(storageRef, photo)
-      photoURL = await getDownloadURL(storageRef)
+      if (photo) {
+        const storageRef = ref(storage, `players/${Date.now()}_${photo.name}`)
+        const snapshot = await uploadBytes(storageRef, photo)
+        photoURL = await getDownloadURL(snapshot.ref)
+      }
+
+      const data: Record<string, unknown> = { name, shirtName, number: parseInt(number), position }
+      if (photoURL) data.photoURL = photoURL
+
+      if (editId) {
+        await updateDoc(doc(db, 'players', editId), data)
+        setEditId(null)
+      } else {
+        await addDoc(collection(db, 'players'), data)
+      }
+      resetForm()
+    } catch (err) {
+      console.error('Upload error:', err)
+      alert('Error saving player. Check that Firebase Storage is enabled.')
     }
-
-    const data: Partial<Omit<Player, 'id'>> = { name, shirtName, number: parseInt(number), position }
-    if (photoURL) data.photoURL = photoURL
-
-    if (editId) {
-      await updateDoc(doc(db, 'players', editId), data)
-      setEditId(null)
-    } else {
-      await addDoc(collection(db, 'players'), data)
-    }
-    resetForm()
+    setUploading(false)
   }
 
   const resetForm = () => { setName(''); setShirtName(''); setNumber(''); setPosition('CM'); setPhoto(null) }
@@ -52,27 +60,31 @@ export default function Players() {
   }
 
   return (
-    <div style={{ padding: 24, maxWidth: 640, margin: '0 auto' }}>
-      <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20 }}>Squad</h2>
+    <div style={{ padding: 20, maxWidth: 640, margin: '0 auto' }}>
+      <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Squad</h2>
 
       <form onSubmit={handleSubmit} style={{
-        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 28,
+        display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24,
         background: 'linear-gradient(135deg, #151515, #1c1c1c)', padding: 16, borderRadius: 14,
         border: '1px solid rgba(255,255,255,0.06)',
       }}>
-        <input placeholder="Full name" value={name} onChange={e => setName(e.target.value)} required />
-        <input placeholder="Shirt name" value={shirtName} onChange={e => setShirtName(e.target.value)} required />
-        <input placeholder="Number" type="number" value={number} onChange={e => setNumber(e.target.value)} required />
-        <select value={position} onChange={e => setPosition(e.target.value)}>
-          {['GK','CB','LB','RB','LWB','RWB','CM','LM','RM','LW','RW','ST'].map(p => <option key={p}>{p}</option>)}
-        </select>
-        <label style={{ fontSize: 12, color: '#888', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', padding: '8px 0' }}>
-          📷 {photo ? photo.name.slice(0, 15) + '...' : 'Add photo'}
-          <input type="file" accept="image/*" onChange={e => setPhoto(e.target.files?.[0] || null)} style={{ display: 'none' }} />
-        </label>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button type="submit" style={{ background: '#d32f2f', color: '#fff', flex: 1 }}>
-            {editId ? '✓ Update' : '+ Add'}
+          <input placeholder="Full name" value={name} onChange={e => setName(e.target.value)} required style={{ flex: 1 }} />
+          <input placeholder="Shirt name" value={shirtName} onChange={e => setShirtName(e.target.value)} required style={{ flex: 1 }} />
+        </div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <input placeholder="#" type="number" value={number} onChange={e => setNumber(e.target.value)} required style={{ width: 60 }} />
+          <select value={position} onChange={e => setPosition(e.target.value)} style={{ width: 70 }}>
+            {['GK','CB','LB','RB','LWB','RWB','CM','LM','RM','LW','RW','ST'].map(p => <option key={p}>{p}</option>)}
+          </select>
+          <label style={{ fontSize: 12, color: '#888', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', flex: 1 }}>
+            📷 {photo ? <span style={{ color: '#4CAF50' }}>Photo ready</span> : 'Add photo'}
+            <input type="file" accept="image/*" onChange={e => setPhoto(e.target.files?.[0] || null)} style={{ display: 'none' }} />
+          </label>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button type="submit" disabled={uploading} style={{ background: '#d32f2f', color: '#fff', flex: 1 }}>
+            {uploading ? 'Uploading...' : editId ? '✓ Update' : '+ Add Player'}
           </button>
           {editId && <button type="button" onClick={() => { setEditId(null); resetForm() }} style={{ background: 'rgba(255,255,255,0.05)', color: '#888', border: '1px solid rgba(255,255,255,0.1)' }}>Cancel</button>}
         </div>
@@ -81,29 +93,29 @@ export default function Players() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {players.sort((a, b) => a.number - b.number).map(p => (
           <div key={p.id} style={{
-            display: 'flex', alignItems: 'center', gap: 12,
+            display: 'flex', alignItems: 'center', gap: 10,
             background: 'linear-gradient(135deg, #141414, #1a1a1a)',
-            padding: '12px 16px', borderRadius: 12,
+            padding: '10px 14px', borderRadius: 12,
             border: '1px solid rgba(255,255,255,0.05)',
           }}>
             {p.photoURL ? (
-              <img src={p.photoURL} alt={p.name} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(211,47,47,0.3)' }} />
+              <img src={p.photoURL} alt={p.name} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(211,47,47,0.3)' }} />
             ) : (
               <div style={{
-                width: 40, height: 40, borderRadius: '50%',
+                width: 36, height: 36, borderRadius: '50%',
                 background: 'linear-gradient(135deg, #d32f2f, #b71c1c)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: 700, fontSize: 13, color: '#fff',
+                fontWeight: 700, fontSize: 12, color: '#fff', flexShrink: 0,
               }}>
                 {p.number}
               </div>
             )}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 600, fontSize: 14 }}>{p.name}</div>
+              <div style={{ fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</div>
               <div style={{ fontSize: 11, color: '#666' }}>#{p.number} · {p.shirtName} · {p.position}</div>
             </div>
-            <button onClick={() => handleEdit(p)} style={{ background: 'rgba(255,255,255,0.05)', color: '#888', padding: '6px 10px', fontSize: 11, border: '1px solid rgba(255,255,255,0.08)' }}>✏️</button>
-            <button onClick={() => handleDelete(p.id)} style={{ background: 'rgba(255,255,255,0.05)', color: '#d32f2f', padding: '6px 10px', fontSize: 11, border: '1px solid rgba(255,255,255,0.08)' }}>✕</button>
+            <button onClick={() => handleEdit(p)} style={{ background: 'rgba(255,255,255,0.05)', color: '#888', padding: '5px 8px', fontSize: 11, border: '1px solid rgba(255,255,255,0.08)' }}>✏️</button>
+            <button onClick={() => handleDelete(p.id)} style={{ background: 'rgba(255,255,255,0.05)', color: '#d32f2f', padding: '5px 8px', fontSize: 11, border: '1px solid rgba(255,255,255,0.08)' }}>✕</button>
           </div>
         ))}
         {players.length === 0 && <p style={{ color: '#555', textAlign: 'center', padding: 20 }}>No players added yet.</p>}
@@ -119,6 +131,7 @@ function CoachesSection() {
   const [editId, setEditId] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [photo, setPhoto] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     return onSnapshot(collection(db, 'coaches'), (snap) => {
@@ -132,14 +145,22 @@ function CoachesSection() {
 
   const handleSave = async () => {
     if (!editId) return
-    let photoURL: string | undefined
-    if (photo) {
-      const storageRef = ref(storage, `coaches/${Date.now()}_${photo.name}`)
-      await uploadBytes(storageRef, photo)
-      photoURL = await getDownloadURL(storageRef)
+    setUploading(true)
+    try {
+      let photoURL: string | undefined
+      if (photo) {
+        const storageRef = ref(storage, `coaches/${Date.now()}_${photo.name}`)
+        const snapshot = await uploadBytes(storageRef, photo)
+        photoURL = await getDownloadURL(snapshot.ref)
+      }
+      const data: Record<string, unknown> = { name }
+      if (photoURL) data.photoURL = photoURL
+      await updateDoc(doc(db, 'coaches', editId), data)
+    } catch (err) {
+      console.error(err)
+      alert('Error saving. Check Firebase Storage rules.')
     }
-    await updateDoc(doc(db, 'coaches', editId), { name, ...(photoURL && { photoURL }) })
-    setEditId(null); setName(''); setPhoto(null)
+    setEditId(null); setName(''); setPhoto(null); setUploading(false)
   }
 
   return (
@@ -148,17 +169,19 @@ function CoachesSection() {
 
       {editId && (
         <div style={{
-          display: 'flex', gap: 8, marginBottom: 14, alignItems: 'center',
+          display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14,
           background: 'linear-gradient(135deg, #151515, #1c1c1c)', padding: 14, borderRadius: 12,
           border: '1px solid rgba(255,255,255,0.06)',
         }}>
-          <input placeholder="Name" value={name} onChange={e => setName(e.target.value)} style={{ flex: 1 }} />
-          <label style={{ fontSize: 12, color: '#888', cursor: 'pointer' }}>
-            📷 {photo ? '✓' : ''}
-            <input type="file" accept="image/*" onChange={e => setPhoto(e.target.files?.[0] || null)} style={{ display: 'none' }} />
-          </label>
-          <button onClick={handleSave} style={{ background: '#d32f2f', color: '#fff' }}>Save</button>
-          <button onClick={() => { setEditId(null); setName('') }} style={{ background: 'rgba(255,255,255,0.05)', color: '#888', border: '1px solid rgba(255,255,255,0.1)' }}>Cancel</button>
+          <input placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <label style={{ fontSize: 12, color: '#888', cursor: 'pointer', flex: 1 }}>
+              📷 {photo ? <span style={{ color: '#4CAF50' }}>Photo ready</span> : 'Add photo'}
+              <input type="file" accept="image/*" onChange={e => setPhoto(e.target.files?.[0] || null)} style={{ display: 'none' }} />
+            </label>
+            <button onClick={handleSave} disabled={uploading} style={{ background: '#d32f2f', color: '#fff' }}>{uploading ? '...' : 'Save'}</button>
+            <button onClick={() => { setEditId(null); setName('') }} style={{ background: 'rgba(255,255,255,0.05)', color: '#888', border: '1px solid rgba(255,255,255,0.1)' }}>Cancel</button>
+          </div>
         </div>
       )}
 
@@ -167,21 +190,21 @@ function CoachesSection() {
           <div key={c.id} style={{
             display: 'flex', alignItems: 'center', gap: 12,
             background: 'linear-gradient(135deg, #141414, #1a1a1a)',
-            padding: '12px 16px', borderRadius: 12,
+            padding: '10px 14px', borderRadius: 12,
             border: '1px solid rgba(255,255,255,0.05)',
           }}>
             {c.photoURL ? (
-              <img src={c.photoURL} alt={c.name} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(100,100,100,0.3)' }} />
+              <img src={c.photoURL} alt={c.name} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
             ) : (
               <div style={{
-                width: 40, height: 40, borderRadius: '50%',
+                width: 36, height: 36, borderRadius: '50%',
                 background: 'linear-gradient(135deg, #444, #333)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 16,
+                fontSize: 14,
               }}>👔</div>
             )}
             <div style={{ flex: 1, fontWeight: 600, fontSize: 14 }}>{c.name}</div>
-            <button onClick={() => handleEdit(c)} style={{ background: 'rgba(255,255,255,0.05)', color: '#888', padding: '6px 10px', fontSize: 11, border: '1px solid rgba(255,255,255,0.08)' }}>✏️</button>
+            <button onClick={() => handleEdit(c)} style={{ background: 'rgba(255,255,255,0.05)', color: '#888', padding: '5px 8px', fontSize: 11, border: '1px solid rgba(255,255,255,0.08)' }}>✏️</button>
           </div>
         ))}
       </div>
