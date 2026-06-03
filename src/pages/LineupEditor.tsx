@@ -105,19 +105,18 @@ export default function LineupEditor() {
     if (!pitchRef.current) return
     try {
       const dataUrl = await toPng(pitchRef.current, { backgroundColor: '#0f0f0f', pixelRatio: 2 })
-      const blob = await (await fetch(dataUrl)).blob()
-      const file = new File([blob], `lineup-${matchDate}.png`, { type: 'image/png' })
 
-      if (navigator.share) {
-        await navigator.share({ text: `Lineup vs ${opponent} (${matchDate})`, files: [file] })
-      } else {
-        const url = `https://wa.me/?text=${encodeURIComponent(`Lineup vs ${opponent} (${matchDate})`)}`
-        window.open(url, '_blank')
-        const a = document.createElement('a')
-        a.href = dataUrl
-        a.download = `lineup-${matchDate}.png`
-        a.click()
-      }
+      // Always download the image
+      const a = document.createElement('a')
+      a.href = dataUrl
+      a.download = `lineup-vs-${opponent || 'TBD'}-${matchDate}.png`
+      a.click()
+
+      // Open WhatsApp with message
+      const text = `Lineup vs ${opponent || 'TBD'} (${matchDate})`
+      window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank')
+
+      alert('Image downloaded! Attach it in the WhatsApp chat that just opened.')
     } catch (err) {
       console.error(err)
     }
