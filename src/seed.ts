@@ -19,25 +19,39 @@ const initialPlayers = [
   { name: 'Vincent Leikman', shirtName: 'V. Leikman', number: 17, position: 'LM' },
 ]
 
-// Coaches that were mistakenly added as players
-const coachNames = ['Alexander Sundqvist', 'Simon Hjelte', 'André Leikman']
+const initialCoaches = [
+  { name: 'Alexander Sundqvist' },
+  { name: 'Simon Hjelte' },
+  { name: 'André Leikman' },
+]
+
+// Names to remove from players collection (coaches added by mistake)
+const coachPlayerNames = ['Alexander Sundqvist', 'Simon Hjelte', 'André Leikman']
 
 export async function seedPlayers() {
-  const snap = await getDocs(collection(db, 'players'))
-  const existing = snap.docs.map(d => ({ id: d.id, name: d.data().name as string }))
+  // --- Players ---
+  const playersSnap = await getDocs(collection(db, 'players'))
+  const existingPlayers = playersSnap.docs.map(d => ({ id: d.id, name: d.data().name as string }))
 
-  // Remove coaches from players if they were added
-  for (const entry of existing) {
-    if (coachNames.includes(entry.name)) {
+  // Remove coaches from players if mistakenly added
+  for (const entry of existingPlayers) {
+    if (coachPlayerNames.includes(entry.name)) {
       await deleteDoc(doc(db, 'players', entry.id))
     }
   }
 
   // Add missing players
-  const existingNames = existing.map(e => e.name).filter(n => !coachNames.includes(n))
-  const toAdd = initialPlayers.filter(p => !existingNames.includes(p.name))
-  for (const player of toAdd) {
+  const playerNames = existingPlayers.map(e => e.name).filter(n => !coachPlayerNames.includes(n))
+  const playersToAdd = initialPlayers.filter(p => !playerNames.includes(p.name))
+  for (const player of playersToAdd) {
     await addDoc(collection(db, 'players'), player)
   }
-  if (toAdd.length) console.log(`Seeded ${toAdd.length} players`)
+
+  // --- Coaches ---
+  const coachesSnap = await getDocs(collection(db, 'coaches'))
+  const existingCoaches = coachesSnap.docs.map(d => d.data().name as string)
+  const coachesToAdd = initialCoaches.filter(c => !existingCoaches.includes(c.name))
+  for (const coach of coachesToAdd) {
+    await addDoc(collection(db, 'coaches'), coach)
+  }
 }

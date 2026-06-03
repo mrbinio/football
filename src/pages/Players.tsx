@@ -102,6 +102,42 @@ export default function Players() {
         ))}
         {players.length === 0 && <p style={{ color: '#555', textAlign: 'center', padding: 20 }}>No players added yet. Add your first player above.</p>}
       </div>
+
+      {/* Coaches section */}
+      <CoachesSection />
+    </div>
+  )
+}
+
+function CoachesSection() {
+  const [coaches, setCoaches] = useState<{ id: string; name: string }[]>([])
+
+  useEffect(() => {
+    return onSnapshot(collection(db, 'coaches'), (snap) => {
+      setCoaches(snap.docs.map(d => ({ id: d.id, name: d.data().name as string })))
+    })
+  }, [])
+
+  return (
+    <div style={{ marginTop: 32 }}>
+      <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 14 }}>Coaches</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {coaches.map(c => (
+          <div key={c.id} style={{
+            display: 'flex', alignItems: 'center', gap: 12,
+            background: '#141414', padding: '12px 16px', borderRadius: 10,
+            border: '1px solid #1f1f1f',
+          }}>
+            <div style={{
+              width: 38, height: 38, borderRadius: '50%',
+              background: 'linear-gradient(135deg, #555, #333)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 14,
+            }}>🧑‍💼</div>
+            <div style={{ fontWeight: 600, fontSize: 14 }}>{c.name}</div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
