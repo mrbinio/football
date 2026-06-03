@@ -14,8 +14,8 @@ export default function Nav() {
         {/* Top bar - minimal */}
         <div style={{
           display: 'flex', alignItems: 'center', padding: '10px 16px',
-          background: 'rgba(17,17,17,0.95)', backdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(255,255,255,0.04)',
+          background: 'rgba(24,24,24,0.95)', backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
           position: 'sticky', top: 0, zIndex: 100,
         }}>
           <img src="/bp-logo.jpg" alt="BP" style={{ width: 22, height: 22, borderRadius: 5, objectFit: 'cover' }} />
@@ -32,8 +32,8 @@ export default function Nav() {
         <nav style={{
           position: 'fixed', bottom: 0, left: 0, right: 0,
           display: 'flex', zIndex: 99,
-          background: 'rgba(13,13,13,0.97)', backdropFilter: 'blur(20px)',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
+          background: 'rgba(20,20,20,0.97)', backdropFilter: 'blur(20px)',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}>
           <TabLink to="/" icon="⚽" label="Editor" active={location.pathname === '/'} />
@@ -48,9 +48,9 @@ export default function Nav() {
   return (
     <nav style={{
       display: 'flex', gap: 20, padding: '14px 28px',
-      background: 'rgba(13,13,13,0.95)', backdropFilter: 'blur(20px)',
+      background: 'rgba(22,22,22,0.95)', backdropFilter: 'blur(20px)',
       alignItems: 'center',
-      borderBottom: '1px solid rgba(255,255,255,0.05)',
+      borderBottom: '1px solid rgba(255,255,255,0.07)',
       position: 'sticky', top: 0, zIndex: 100,
     }}>
       <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>

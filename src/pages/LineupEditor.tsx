@@ -430,8 +430,8 @@ export default function LineupEditor() {
         <div style={{
           position: 'fixed', bottom: 56, left: 0, right: 0,
           display: 'flex', gap: 6, padding: '10px 12px',
-          background: 'rgba(8,8,8,0.98)', backdropFilter: 'blur(20px)',
-          borderTop: '1px solid rgba(255,255,255,0.04)',
+          background: 'rgba(20,20,20,0.98)', backdropFilter: 'blur(20px)',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
           zIndex: 100,
         }}>
           <button onClick={handleSave} disabled={saving} style={{ flex: 1, background: 'linear-gradient(135deg, #d32f2f, #9a0007)', color: '#fff', fontSize: 12, padding: '10px 0', boxShadow: '0 2px 12px rgba(211,47,47,0.2)' }}>
