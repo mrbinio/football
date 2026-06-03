@@ -12,7 +12,14 @@ export default function Login() {
   const [resetEmail, setResetEmail] = useState('')
 
   const handleGoogle = () => {
-    signInWithPopup(auth, new GoogleAuthProvider()).catch(e => setError(e.message))
+    setError('')
+    signInWithPopup(auth, new GoogleAuthProvider()).catch(e => {
+      if (e.code === 'auth/popup-blocked') {
+        setError('Popup blocked! Allow popups for this site in your browser, then try again.')
+      } else {
+        setError(e.message)
+      }
+    })
   }
 
   const handleEmail = async (e: React.FormEvent) => {

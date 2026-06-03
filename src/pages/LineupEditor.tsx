@@ -152,14 +152,36 @@ export default function LineupEditor() {
   const handleShare = async () => {
     if (!pitchRef.current) return
     try {
+      // Pre-load all images as base64 for screenshot
+      const images = pitchRef.current.querySelectorAll('img') as NodeListOf<HTMLImageElement>
+      const saved: { el: HTMLImageElement; original: string }[] = []
+
+      for (const img of images) {
+        if (img.src && img.src.includes('firebasestorage')) {
+          try {
+            const res = await fetch(img.src)
+            const blob = await res.blob()
+            const b64 = await new Promise<string>((resolve) => {
+              const r = new FileReader()
+              r.onloadend = () => resolve(r.result as string)
+              r.readAsDataURL(blob)
+            })
+            saved.push({ el: img, original: img.src })
+            img.src = b64
+          } catch { /* skip */ }
+        }
+      }
+
+      // Small delay to let images render
+      await new Promise(r => setTimeout(r, 100))
+
       const dataUrl = await toPng(pitchRef.current, {
         backgroundColor: '#111',
         pixelRatio: 2,
-        filter: (node) => {
-          if (node instanceof HTMLImageElement && node.src && node.src.includes('firebasestorage')) return false
-          return true
-        },
       })
+
+      // Restore original src
+      saved.forEach(({ el, original }) => { el.src = original })
 
       const blob = await (await fetch(dataUrl)).blob()
       const file = new File([blob], `lineup-${matchDate}.png`, { type: 'image/png' })
