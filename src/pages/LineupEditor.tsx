@@ -4,7 +4,7 @@ import { db, auth } from '../firebase'
 import { Player, Lineup } from '../types'
 import { formations } from '../formations'
 import { useParams } from 'react-router-dom'
-import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, TouchSensor, MouseSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, MouseSensor, useSensor, useSensors } from '@dnd-kit/core'
 import Pitch from '../components/Pitch'
 import BenchArea from '../components/BenchArea'
 import PlayerJersey from '../components/PlayerJersey'
@@ -20,15 +20,12 @@ export default function LineupEditor() {
   const [opponent, setOpponent] = useState('')
   const [activeId, setActiveId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null)
   const pitchRef = useRef<HTMLDivElement>(null)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: { delay: 150, tolerance: 5 },
-  })
-  const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: { distance: 5 },
-  })
-  const sensors = useSensors(mouseSensor, touchSensor)
+  const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 5 } })
+  const sensors = useSensors(mouseSensor)
 
   useEffect(() => {
     return onSnapshot(collection(db, 'players'), (snap) => {
@@ -53,15 +50,59 @@ export default function LineupEditor() {
   const assignedPlayerIds = [...Object.values(positions), ...bench]
   const availablePlayers = players.filter(p => !assignedPlayerIds.includes(p.id))
 
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string)
+  // --- Mobile: tap to assign ---
+  const handlePlayerTap = (playerId: string) => {
+    if (!isMobile) return
+    setSelectedPlayer(prev => prev === playerId ? null : playerId)
   }
 
+  const handlePositionTap = (posKey: string) => {
+    if (!isMobile) return
+
+    if (selectedPlayer) {
+      // Assign selected player to this position
+      const newPositions = { ...positions }
+      // Remove player from old position
+      Object.keys(newPositions).forEach(key => {
+        if (newPositions[key] === selectedPlayer) delete newPositions[key]
+      })
+      const newBench = bench.filter(bId => bId !== selectedPlayer)
+
+      // Swap if occupied
+      const existing = newPositions[posKey]
+      if (existing) {
+        const prevPos = Object.keys(positions).find(k => positions[k] === selectedPlayer)
+        if (prevPos) newPositions[prevPos] = existing
+        else newBench.push(existing)
+      }
+      newPositions[posKey] = selectedPlayer
+      setPositions(newPositions)
+      setBench(newBench)
+      setSelectedPlayer(null)
+    } else {
+      // Tap on occupied position -> select that player to move
+      const playerId = positions[posKey]
+      if (playerId) setSelectedPlayer(playerId)
+    }
+  }
+
+  const handleRemoveFromPosition = (playerId: string) => {
+    if (!isMobile) return
+    const newPositions = { ...positions }
+    Object.keys(newPositions).forEach(key => {
+      if (newPositions[key] === playerId) delete newPositions[key]
+    })
+    setPositions(newPositions)
+    setBench(bench.filter(b => b !== playerId))
+    setSelectedPlayer(null)
+  }
+
+  // --- Desktop: drag & drop ---
+  const handleDragStart = (event: DragStartEvent) => { setActiveId(event.active.id as string) }
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveId(null)
     const { active, over } = event
     if (!over) return
-
     const playerId = active.id as string
     const target = over.id as string
 
@@ -73,9 +114,7 @@ export default function LineupEditor() {
 
     if (target === 'bench') {
       newBench.push(playerId)
-    } else if (target === 'available') {
-      // dropped back
-    } else {
+    } else if (target !== 'available') {
       const existing = newPositions[target]
       if (existing) {
         const prevPos = Object.keys(positions).find(k => positions[k] === playerId)
@@ -84,7 +123,6 @@ export default function LineupEditor() {
       }
       newPositions[target] = playerId
     }
-
     setPositions(newPositions)
     setBench(newBench)
   }
@@ -92,19 +130,13 @@ export default function LineupEditor() {
   const handleSave = async () => {
     setSaving(true)
     const data = {
-      matchDate,
-      opponent,
-      formation: formation.name,
-      positions,
-      bench,
+      matchDate, opponent, formation: formation.name,
+      positions, bench,
       createdBy: auth.currentUser?.email || '',
       createdAt: Date.now(),
     }
-    if (id) {
-      await updateDoc(doc(db, 'lineups', id), data)
-    } else {
-      await addDoc(collection(db, 'lineups'), data)
-    }
+    if (id) await updateDoc(doc(db, 'lineups', id), data)
+    else await addDoc(collection(db, 'lineups'), data)
     setSaving(false)
     alert('Lineup saved!')
   }
@@ -112,35 +144,162 @@ export default function LineupEditor() {
   const handleShare = async () => {
     if (!pitchRef.current) return
     try {
-      const dataUrl = await toPng(pitchRef.current, { backgroundColor: '#0f0f0f', pixelRatio: 2 })
+      const dataUrl = await toPng(pitchRef.current, { backgroundColor: '#0a0a0a', pixelRatio: 2 })
       const blob = await (await fetch(dataUrl)).blob()
       const file = new File([blob], `lineup-${matchDate}.png`, { type: 'image/png' })
-
-      // Mobile: use native share with file
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          text: `Lineup vs ${opponent || 'TBD'} (${matchDate})`,
-          files: [file],
-        })
+        await navigator.share({ text: `Lineup vs ${opponent || 'TBD'} (${matchDate})`, files: [file] })
       } else {
-        // Desktop: download + open WhatsApp Web
         const a = document.createElement('a')
         a.href = dataUrl
         a.download = `lineup-vs-${opponent || 'TBD'}-${matchDate}.png`
         a.click()
         window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(`Lineup vs ${opponent || 'TBD'} (${matchDate})`)}`, '_blank')
-        alert('Image downloaded! Attach it in the WhatsApp chat.')
       }
-    } catch (err) {
-      console.error(err)
-    }
+    } catch (err) { console.error(err) }
   }
 
   const activePlayer = players.find(p => p.id === activeId)
 
+  // --- MOBILE LAYOUT ---
+  if (isMobile) {
+    return (
+      <div style={{ padding: '16px', maxWidth: 500, margin: '0 auto' }}>
+        {/* Controls */}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+          <input type="date" value={matchDate} onChange={e => setMatchDate(e.target.value)} style={{ flex: 1, minWidth: 120 }} />
+          <input placeholder="Opponent" value={opponent} onChange={e => setOpponent(e.target.value)} style={{ flex: 1, minWidth: 100 }} />
+        </div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          <select value={formation.name} onChange={e => setFormation(formations.find(f => f.name === e.target.value)!)} style={{ flex: 1 }}>
+            {formations.map(f => <option key={f.name}>{f.name}</option>)}
+          </select>
+          <button onClick={handleSave} disabled={saving} style={{ background: 'linear-gradient(135deg, #d32f2f, #b71c1c)', color: '#fff', flex: 1 }}>
+            {saving ? '...' : '💾 Save'}
+          </button>
+          <button onClick={handleShare} style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)', color: '#fff' }}>📱</button>
+        </div>
+
+        {/* Selected player indicator */}
+        {selectedPlayer && (
+          <div style={{
+            background: 'rgba(211,47,47,0.15)', border: '1px solid rgba(211,47,47,0.3)',
+            borderRadius: 10, padding: '10px 14px', marginBottom: 12,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            <span style={{ fontSize: 13, color: '#eee' }}>
+              Tap a position for: <strong>{players.find(p => p.id === selectedPlayer)?.shirtName}</strong>
+            </span>
+            <button onClick={() => setSelectedPlayer(null)} style={{ background: '#333', color: '#fff', padding: '4px 10px', fontSize: 11 }}>Cancel</button>
+          </div>
+        )}
+
+        {/* Pitch - full width */}
+        <div ref={pitchRef}>
+          <Pitch
+            formation={formation} positions={positions} players={players}
+            onPositionTap={handlePositionTap} selectedPlayer={selectedPlayer}
+          />
+        </div>
+
+        {/* Players list below pitch */}
+        <div style={{ marginTop: 20 }}>
+          <h3 style={{ fontSize: 11, color: '#666', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5 }}>
+            Available ({availablePlayers.length})
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 6 }}>
+            {availablePlayers.map(p => (
+              <div
+                key={p.id}
+                onClick={() => handlePlayerTap(p.id)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '10px 12px', borderRadius: 10,
+                  background: selectedPlayer === p.id ? 'rgba(211,47,47,0.15)' : 'rgba(255,255,255,0.03)',
+                  border: selectedPlayer === p.id ? '1px solid #d32f2f' : '1px solid rgba(255,255,255,0.06)',
+                  cursor: 'pointer', transition: 'all 0.15s',
+                }}
+              >
+                <div style={{
+                  width: 28, height: 28, borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #d32f2f, #b71c1c)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0,
+                }}>{p.number || '-'}</div>
+                <div style={{ overflow: 'hidden' }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#eee', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.shirtName}</div>
+                  <div style={{ fontSize: 9, color: '#555' }}>{p.position}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {bench.length > 0 && (
+            <>
+              <h3 style={{ fontSize: 11, color: '#666', marginTop: 16, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5 }}>Bench</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 6 }}>
+                {bench.map(bId => {
+                  const p = players.find(pl => pl.id === bId)
+                  if (!p) return null
+                  return (
+                    <div key={p.id} onClick={() => handlePlayerTap(p.id)} style={{
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      padding: '10px 12px', borderRadius: 10,
+                      background: selectedPlayer === p.id ? 'rgba(211,47,47,0.15)' : 'rgba(255,255,255,0.03)',
+                      border: selectedPlayer === p.id ? '1px solid #d32f2f' : '1px solid rgba(255,255,255,0.06)',
+                      cursor: 'pointer',
+                    }}>
+                      <div style={{
+                        width: 28, height: 28, borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #555, #333)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0,
+                      }}>{p.number || '-'}</div>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: '#eee' }}>{p.shirtName}</div>
+                    </div>
+                  )
+                })}
+              </div>
+            </>
+          )}
+
+          {/* On-pitch players — tap to remove */}
+          {Object.values(positions).length > 0 && (
+            <>
+              <h3 style={{ fontSize: 11, color: '#666', marginTop: 16, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5 }}>On pitch (tap to move)</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 6 }}>
+                {Object.entries(positions).map(([posKey, pId]) => {
+                  const p = players.find(pl => pl.id === pId)
+                  if (!p) return null
+                  const posLabel = formation.positions.find(fp => fp.key === posKey)?.label || posKey
+                  return (
+                    <div key={pId} onClick={() => handleRemoveFromPosition(pId)} style={{
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      padding: '10px 12px', borderRadius: 10,
+                      background: 'rgba(30,120,50,0.1)', border: '1px solid rgba(30,120,50,0.2)',
+                      cursor: 'pointer',
+                    }}>
+                      <div style={{
+                        width: 28, height: 28, borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #2e7d32, #1b5e20)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 8, fontWeight: 700, color: '#fff', flexShrink: 0,
+                      }}>{posLabel}</div>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: '#eee' }}>{p.shirtName}</div>
+                    </div>
+                  )
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // --- DESKTOP LAYOUT (unchanged) ---
   return (
     <div style={{ padding: '20px', maxWidth: 1000, margin: '0 auto' }}>
-      {/* Header bar */}
       <div style={{
         display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20, alignItems: 'center',
         background: 'linear-gradient(135deg, #141414 0%, #1a1a1a 100%)',
@@ -154,58 +313,32 @@ export default function LineupEditor() {
           {formations.map(f => <option key={f.name}>{f.name}</option>)}
         </select>
         <div style={{ flex: 1 }} />
-        <button onClick={handleSave} disabled={saving} style={{
-          background: 'linear-gradient(135deg, #d32f2f, #b71c1c)',
-          color: '#fff', boxShadow: '0 2px 10px rgba(211,47,47,0.3)',
-        }}>
+        <button onClick={handleSave} disabled={saving} style={{ background: 'linear-gradient(135deg, #d32f2f, #b71c1c)', color: '#fff', boxShadow: '0 2px 10px rgba(211,47,47,0.3)' }}>
           {saving ? 'Saving...' : '💾 Save'}
         </button>
-        <button onClick={handleShare} style={{
-          background: 'linear-gradient(135deg, #25D366, #128C7E)',
-          color: '#fff', boxShadow: '0 2px 10px rgba(37,211,102,0.3)',
-        }}>
+        <button onClick={handleShare} style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)', color: '#fff', boxShadow: '0 2px 10px rgba(37,211,102,0.3)' }}>
           📱 Share
         </button>
       </div>
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-          {/* Pitch */}
           <div ref={pitchRef} style={{ flex: 1, minWidth: 300 }}>
             <Pitch formation={formation} positions={positions} players={players} />
           </div>
-
-          {/* Sidebar */}
-          <div style={{
-            width: 220, display: 'flex', flexDirection: 'column', gap: 16,
-            position: 'sticky', top: 80,
-          }}>
-            <div style={{
-              background: 'linear-gradient(135deg, #141414, #1a1a1a)',
-              borderRadius: 14, padding: 14,
-              border: '1px solid rgba(255,255,255,0.06)',
-            }}>
+          <div style={{ width: 220, display: 'flex', flexDirection: 'column', gap: 16, position: 'sticky', top: 80 }}>
+            <div style={{ background: 'linear-gradient(135deg, #141414, #1a1a1a)', borderRadius: 14, padding: 14, border: '1px solid rgba(255,255,255,0.06)' }}>
               <h3 style={{ fontSize: 11, color: '#666', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600 }}>Bench</h3>
               <BenchArea bench={bench} players={players} />
             </div>
-
-            <div style={{
-              background: 'linear-gradient(135deg, #141414, #1a1a1a)',
-              borderRadius: 14, padding: 14,
-              border: '1px solid rgba(255,255,255,0.06)',
-            }}>
-              <h3 style={{ fontSize: 11, color: '#666', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600 }}>
-                Available ({availablePlayers.length})
-              </h3>
+            <div style={{ background: 'linear-gradient(135deg, #141414, #1a1a1a)', borderRadius: 14, padding: 14, border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h3 style={{ fontSize: 11, color: '#666', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600 }}>Available ({availablePlayers.length})</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 380, overflowY: 'auto' }}>
-                {availablePlayers.map(p => (
-                  <PlayerJersey key={p.id} player={p} size="small" />
-                ))}
+                {availablePlayers.map(p => (<PlayerJersey key={p.id} player={p} size="small" />))}
               </div>
             </div>
           </div>
         </div>
-
         <DragOverlay dropAnimation={null}>
           {activePlayer ? <PlayerJersey player={activePlayer} size="small" /> : null}
         </DragOverlay>
