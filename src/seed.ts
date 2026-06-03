@@ -24,10 +24,13 @@ const initialPlayers = [
 
 export async function seedPlayers() {
   const snap = await getDocs(collection(db, 'players'))
-  if (snap.size > 0) return // already seeded
+  const existingNames = snap.docs.map(d => d.data().name as string)
 
-  for (const player of initialPlayers) {
+  const toAdd = initialPlayers.filter(p => !existingNames.includes(p.name))
+  if (toAdd.length === 0) return
+
+  for (const player of toAdd) {
     await addDoc(collection(db, 'players'), player)
   }
-  console.log('Players seeded!')
+  console.log(`Seeded ${toAdd.length} players`)
 }
