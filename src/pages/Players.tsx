@@ -62,7 +62,11 @@ export default function Players() {
         <select value={position} onChange={e => setPosition(e.target.value)}>
           {['GK','CB','LB','RB','LWB','RWB','CM','LM','RM','LW','RW','ST'].map(p => <option key={p}>{p}</option>)}
         </select>
-        <input type="file" accept="image/*" onChange={e => setPhoto(e.target.files?.[0] || null)} style={{ fontSize: 12 }} />
+        <label style={{ fontSize: 12, color: '#666', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+          📷
+          <input type="file" accept="image/*" onChange={e => setPhoto(e.target.files?.[0] || null)} style={{ display: 'none' }} />
+          {photo && <span style={{ color: '#4CAF50' }}>✓</span>}
+        </label>
         <button type="submit" style={{ background: '#d32f2f', color: '#fff' }}>
           {editId ? 'Update' : '+ Add'}
         </button>

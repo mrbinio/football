@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect, useCallback } from 'react'
 import { onAuthStateChanged, User } from 'firebase/auth'
 import { auth } from './firebase'
+import { seedPlayers } from './seed'
 import Login from './pages/Login'
 import LineupEditor from './pages/LineupEditor'
 import Players from './pages/Players'
@@ -16,7 +17,10 @@ export default function App() {
 
   useEffect(() => {
     return onAuthStateChanged(auth, (u) => {
-      if (u && !user) setShowIntro(true)
+      if (u && !user) {
+        setShowIntro(true)
+        seedPlayers()
+      }
       setUser(u)
       setLoading(false)
     })
