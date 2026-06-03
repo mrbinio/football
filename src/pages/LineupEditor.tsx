@@ -32,23 +32,17 @@ export default function LineupEditor() {
   const pitchRef = useRef<HTMLDivElement>(null)
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
-  // Timer logic — track minutes per player on pitch
+  // Timer logic — track seconds per player on pitch
   useEffect(() => {
     if (timerRunning) {
       timerRef.current = setInterval(() => {
-        setTimerSeconds(s => {
-          const newS = s + 1
-          // Every 60 seconds, add 1 minute to players on pitch
-          if (newS % 60 === 0) {
-            setPlayerMinutes(prev => {
-              const updated = { ...prev }
-              Object.values(positions).forEach(pId => {
-                updated[pId] = (updated[pId] || 0) + 1
-              })
-              return updated
-            })
-          }
-          return newS
+        setTimerSeconds(s => s + 1)
+        setPlayerMinutes(prev => {
+          const updated = { ...prev }
+          Object.values(positions).forEach(pId => {
+            updated[pId] = (updated[pId] || 0) + 1
+          })
+          return updated
         })
       }, 1000)
     } else if (timerRef.current) {
@@ -476,7 +470,7 @@ export default function LineupEditor() {
                         fontSize: 8, fontWeight: 700, color: '#fff', flexShrink: 0,
                       }}>{posLabel}</div>
                       <div onClick={() => handleRemoveFromPosition(pId)} style={{ fontSize: 11, fontWeight: 600, color: '#eee', flex: 1, cursor: 'pointer' }}>{p.shirtName}</div>
-                      {mins > 0 && <span style={{ fontSize: 10, color: '#4CAF50', fontWeight: 600 }}>{mins}′</span>}
+                      {mins > 0 && <span style={{ fontSize: 10, color: '#4CAF50', fontWeight: 600 }}>{formatTime(mins)}</span>}
                       {hasNextIn && (
                         <button onClick={() => {
                           const subIn = nextIn[0]
