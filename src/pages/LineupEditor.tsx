@@ -168,21 +168,17 @@ export default function LineupEditor() {
   // --- MOBILE LAYOUT ---
   if (isMobile) {
     return (
-      <div style={{ padding: '16px', maxWidth: 500, margin: '0 auto' }}>
+      <div style={{ padding: '16px', paddingBottom: 80, maxWidth: 500, margin: '0 auto' }}>
         {/* Controls */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
           <input type="date" value={matchDate} onChange={e => setMatchDate(e.target.value)} style={{ flex: 1, minWidth: 120 }} />
           <input placeholder="Opponent" value={opponent} onChange={e => setOpponent(e.target.value)} style={{ flex: 1, minWidth: 100 }} />
         </div>
         <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
           <input placeholder="Title (e.g. Cup Round 2)" value={title} onChange={e => setTitle(e.target.value)} style={{ flex: 1 }} />
-          <select value={formation.name} onChange={e => setFormation(formations.find(f => f.name === e.target.value)!)} style={{ flex: 1 }}>
+          <select value={formation.name} onChange={e => setFormation(formations.find(f => f.name === e.target.value)!)} style={{ width: 90 }}>
             {formations.map(f => <option key={f.name}>{f.name}</option>)}
           </select>
-          <button onClick={handleSave} disabled={saving} style={{ background: 'linear-gradient(135deg, #d32f2f, #b71c1c)', color: '#fff', flex: 1 }}>
-            {saving ? '...' : '💾 Save'}
-          </button>
-          <button onClick={handleShare} style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)', color: '#fff' }}>📱</button>
         </div>
 
         {/* Selected player indicator */}
@@ -298,11 +294,25 @@ export default function LineupEditor() {
             </>
           )}
         </div>
+
+        {/* Floating action bar */}
+        <div style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0,
+          display: 'flex', gap: 10, padding: '12px 16px',
+          background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(10px)',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          zIndex: 100,
+        }}>
+          <button onClick={handleSave} disabled={saving} style={{ flex: 1, background: 'linear-gradient(135deg, #d32f2f, #b71c1c)', color: '#fff' }}>
+            {saving ? 'Saving...' : '💾 Save Lineup'}
+          </button>
+          <button onClick={handleShare} style={{ flex: 1, background: 'linear-gradient(135deg, #25D366, #128C7E)', color: '#fff' }}>
+            📱 Share WhatsApp
+          </button>
+        </div>
       </div>
     )
   }
-
-  // --- DESKTOP LAYOUT (unchanged) ---
   return (
     <div style={{ padding: '20px', maxWidth: 1000, margin: '0 auto' }}>
       <div style={{

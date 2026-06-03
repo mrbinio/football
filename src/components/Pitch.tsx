@@ -13,7 +13,7 @@ interface Props {
 export default function Pitch({ formation, positions, players, onPositionTap, selectedPlayer }: Props) {
   return (
     <div style={{
-      position: 'relative', width: '100%', paddingBottom: '135%',
+      position: 'relative', width: '100%', paddingBottom: '150%',
       borderRadius: 18, overflow: 'hidden',
       background: 'linear-gradient(180deg, #15572a 0%, #1d7a36 25%, #22913e 50%, #1d7a36 75%, #15572a 100%)',
       boxShadow: '0 12px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
@@ -79,7 +79,7 @@ function PositionSlot({ posKey, label, x, y, player, onTap, isTarget }: {
       style={{
         position: 'absolute',
         left: `${x}%`,
-        top: `${(y / 1.35)}%`,
+        top: `${(y / 1.5)}%`,
         transform: 'translate(-50%, -50%)',
         display: 'flex',
         flexDirection: 'column',

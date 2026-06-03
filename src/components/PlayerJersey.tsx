@@ -59,16 +59,19 @@ export default function PlayerJersey({ player, size = 'small' }: Props) {
   )
 
   if (size === 'pitch') {
+    // Show short name: first word of shirtName, or last name
+    const displayName = (player.shirtName || player.name).split(' ')[0]
+
     return (
       <div ref={setNodeRef} {...listeners} {...attributes} style={{ ...style, flexDirection: 'column', alignItems: 'center' }}>
         <Jersey w={40} h={44} />
         <span style={{
           fontSize: 10, fontWeight: 700, textAlign: 'center',
-          maxWidth: 90, color: '#fff',
-          textShadow: '0 1px 4px rgba(0,0,0,0.95), 0 0 8px rgba(0,0,0,0.7)',
-          marginTop: 3, lineHeight: 1.2, wordBreak: 'break-word',
+          color: '#fff',
+          textShadow: '0 1px 3px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.7)',
+          marginTop: 3, whiteSpace: 'nowrap',
         }}>
-          {player.shirtName || player.name.split(' ').pop()}
+          {displayName}
         </span>
       </div>
     )
