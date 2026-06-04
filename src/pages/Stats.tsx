@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { collection, onSnapshot } from 'firebase/firestore'
+import { collection, onSnapshot, updateDoc, doc } from 'firebase/firestore'
 import { db } from '../firebase'
 import { Player, Lineup } from '../types'
 
@@ -110,6 +110,16 @@ export default function Stats() {
                       </div>
                     )
                   })}
+                  <button onClick={() => {
+                    if (window.confirm('Clear time stats for this match?')) {
+                      updateDoc(doc(db, 'lineups', l.id), { playerSeconds: {} })
+                    }
+                  }} style={{
+                    marginTop: 6, background: 'rgba(255,255,255,0.03)', color: '#888',
+                    fontSize: 10, padding: '5px 10px', border: '1px solid rgba(255,255,255,0.08)',
+                  }}>
+                    🗑 Clear match stats
+                  </button>
                 </div>
               )}
             </div>
@@ -157,6 +167,22 @@ export default function Stats() {
             })}
           </div>
         </>
+      )}
+
+      {/* Reset all - hidden at bottom */}
+      {matchesWithTime.length > 0 && (
+        <div style={{ marginTop: 40, textAlign: 'center' }}>
+          <button onClick={() => {
+            if (window.confirm('Reset ALL time stats from all matches? This cannot be undone.')) {
+              matchesWithTime.forEach(l => updateDoc(doc(db, 'lineups', l.id), { playerSeconds: {} }))
+            }
+          }} style={{
+            background: 'transparent', color: '#555', fontSize: 11, padding: '8px 16px',
+            border: '1px solid rgba(255,255,255,0.06)',
+          }}>
+            Reset all stats
+          </button>
+        </div>
       )}
     </div>
   )
