@@ -117,7 +117,8 @@ export default function Lineups() {
                 <div style={{ fontSize: 12, color: '#666' }}>
                   {l.matchDate} · {l.formation} · {l.createdByName || l.createdBy}
                 </div>
-                {l.result && <div style={{ fontSize: 11, color: '#d32f2f', marginTop: 2 }}>Result: {l.result} {l.rating ? '★'.repeat(l.rating) : ''}</div>}
+                {l.result && <div style={{ fontSize: 11, color: '#d32f2f', marginTop: 2 }}>Result: {l.result}</div>}
+                {l.rating > 0 && <div style={{ fontSize: 12, marginTop: 2 }}>{'★'.repeat(l.rating)}{'☆'.repeat(5 - l.rating)}</div>}
               </div>
               <button onClick={e => openEdit(e, l)} onTouchEnd={e => { e.stopPropagation(); openEdit(e as unknown as React.MouseEvent, l) }} style={{ background: 'rgba(255,255,255,0.05)', color: '#888', padding: '8px 12px', fontSize: 12, border: '1px solid rgba(255,255,255,0.08)', minWidth: 36 }}>✏️</button>
               <button onClick={e => handleDelete(e, l.id)} onTouchEnd={e => { e.stopPropagation(); handleDelete(e as unknown as React.MouseEvent, l.id) }} style={{ background: 'rgba(255,255,255,0.05)', color: '#d32f2f', padding: '8px 12px', fontSize: 12, border: '1px solid rgba(255,255,255,0.08)', minWidth: 36 }}>✕</button>
