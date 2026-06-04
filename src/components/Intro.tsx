@@ -20,7 +20,7 @@ export default function Intro({ onFinish }: Props) {
       position: 'fixed', inset: 0, zIndex: 9999,
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       opacity: phase >= 3 ? 0 : 1, transition: 'opacity 1s ease-out',
-      background: 'radial-gradient(circle at 50% 40%, #1a0808 0%, #050505 70%)',
+      background: 'radial-gradient(circle at 50% 40%, #1a1808 0%, #0a0e08 70%)',
       overflow: 'hidden',
     }}>
       <style>{`
@@ -30,8 +30,8 @@ export default function Intro({ onFinish }: Props) {
           100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
         }
         @keyframes glow-pulse {
-          0%, 100% { box-shadow: 0 0 50px rgba(211,47,47,0.15), 0 0 100px rgba(211,47,47,0.05), 0 30px 60px rgba(0,0,0,0.6); }
-          50% { box-shadow: 0 0 80px rgba(211,47,47,0.25), 0 0 140px rgba(211,47,47,0.1), 0 30px 60px rgba(0,0,0,0.6); }
+          0%, 100% { box-shadow: 0 0 50px rgba(213,191,147,0.15), 0 0 100px rgba(213,191,147,0.05), 0 30px 60px rgba(0,0,0,0.6); }
+          50% { box-shadow: 0 0 80px rgba(213,191,147,0.25), 0 0 140px rgba(213,191,147,0.1), 0 30px 60px rgba(0,0,0,0.6); }
         }
         @keyframes shimmer {
           0% { background-position: -200% center; }
@@ -47,7 +47,7 @@ export default function Intro({ onFinish }: Props) {
       <div style={{
         position: 'absolute', top: '30%', left: '50%', transform: 'translate(-50%, -50%)',
         width: 300, height: 300, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(211,47,47,0.08) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(213,191,147,0.08) 0%, transparent 70%)',
         filter: 'blur(40px)', pointerEvents: 'none',
       }} />
 
@@ -69,7 +69,7 @@ export default function Intro({ onFinish }: Props) {
         width: 80, height: 2, marginTop: 28,
         borderRadius: 1,
         opacity: phase >= 2 ? 1 : 0,
-        background: phase >= 2 ? 'linear-gradient(90deg, transparent, #d32f2f, #ff5252, #d32f2f, transparent)' : 'transparent',
+        background: phase >= 2 ? 'linear-gradient(90deg, transparent, #998561, #D5BF93, #998561, transparent)' : 'transparent',
         backgroundSize: '200% 100%',
         animation: phase >= 2 ? 'shimmer 2s linear infinite, fade-up 0.5s ease-out forwards' : 'none',
       }} />
