@@ -129,7 +129,7 @@ export default function Players() {
           <div key={p.id} onClick={() => openEdit(p)} style={{
             display: 'flex', alignItems: 'center', gap: 10,
             background: 'var(--card)',
-            padding: '10px 14px', borderRadius: 12,
+            padding: '10px 14px', borderRadius: 16,
             border: '1px solid var(--card-border)', cursor: 'pointer',
           }}>
             {p.photoURL ? (
@@ -252,7 +252,7 @@ function CoachesSection() {
           <div key={c.id} onClick={() => openEdit(c)} style={{
             display: 'flex', alignItems: 'center', gap: 12,
             background: 'var(--card)',
-            padding: '10px 14px', borderRadius: 12,
+            padding: '10px 14px', borderRadius: 16,
             border: '1px solid var(--card-border)', cursor: 'pointer',
           }}>
             {c.photoURL ? (

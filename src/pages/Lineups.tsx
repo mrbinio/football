@@ -100,7 +100,7 @@ export default function Lineups() {
         {lineups.map(l => (
           <div key={l.id} style={{
             background: 'var(--card)',
-            padding: '14px 16px', borderRadius: 12,
+            padding: '14px 16px', borderRadius: 16,
             border: '1px solid var(--card-border)', cursor: 'pointer',
             transition: 'border-color 0.2s',
           }} onClick={() => navigate(`/lineup/${l.id}`)}>

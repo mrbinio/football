@@ -65,7 +65,7 @@ export default function Stats() {
             <div key={l.id}>
               <div onClick={() => setExpandedMatch(isExpanded ? null : l.id)} style={{
                 display: 'flex', alignItems: 'center', gap: 10,
-                background: 'var(--card)', padding: '12px 14px', borderRadius: 12,
+                background: 'var(--card)', padding: '12px 14px', borderRadius: 16,
                 border: isExpanded ? '1px solid rgba(211,47,47,0.3)' : '1px solid rgba(255,255,255,0.05)',
                 cursor: 'pointer',
               }}>
@@ -148,7 +148,7 @@ export default function Stats() {
               const isLow = pct < 40
               return (
                 <div key={p.id} style={{
-                  background: 'var(--card)', borderRadius: 12, padding: '10px 14px',
+                  background: 'var(--card)', borderRadius: 16, padding: '10px 14px',
                   border: isLow ? '1px solid rgba(255,193,7,0.2)' : '1px solid rgba(255,255,255,0.05)',
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>

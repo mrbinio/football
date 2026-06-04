@@ -309,10 +309,10 @@ export default function LineupEditor() {
         {/* Match timer */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14,
-          background: 'var(--card)', borderRadius: 12, padding: '10px 14px',
+          background: 'var(--card)', borderRadius: 16, padding: '10px 14px',
           border: '1px solid var(--card-border)',
         }}>
-          <span style={{ fontSize: 22, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: timerRunning ? '#4CAF50' : '#888', flex: 1 }}>
+          <span style={{ fontSize: 32, fontWeight: 300, fontVariantNumeric: 'tabular-nums', color: timerRunning ? '#d32f2f' : 'var(--text3)', flex: 1, letterSpacing: -1 }}>
             ⏱ {formatTime(timerSeconds)}
           </span>
           <button onClick={() => setTimerRunning(!timerRunning)} style={{
@@ -340,7 +340,7 @@ export default function LineupEditor() {
             playerSeconds={playerMinutes}
           />
           {bench.length > 0 && (
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginTop: 10, padding: '10px', background: 'rgba(0,0,0,0.3)', borderRadius: 12 }}>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginTop: 10, padding: '10px', background: 'rgba(0,0,0,0.3)', borderRadius: 16 }}>
               {bench.map(bId => {
                 const p = players.find(pl => pl.id === bId)
                 if (!p) return null
