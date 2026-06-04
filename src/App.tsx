@@ -9,6 +9,10 @@ import LineupEditor from './pages/LineupEditor'
 import Players from './pages/Players'
 import Lineups from './pages/Lineups'
 import Stats from './pages/Stats'
+import Attendance from './pages/Attendance'
+import Compare from './pages/Compare'
+import Templates from './pages/Templates'
+import More from './pages/More'
 import Nav from './components/Nav'
 import Intro from './components/Intro'
 
@@ -54,6 +58,10 @@ export default function App() {
         <Route path="/players" element={<Players />} />
         <Route path="/lineups" element={<Lineups />} />
         <Route path="/stats" element={<Stats />} />
+        <Route path="/attendance" element={<Attendance />} />
+        <Route path="/compare" element={<Compare />} />
+        <Route path="/templates" element={<Templates />} />
+        <Route path="/more" element={<More />} />
         <Route path="/lineup/:id" element={<LineupEditor />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

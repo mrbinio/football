@@ -44,7 +44,7 @@ export default function Nav() {
           <TabLink to="/" icon="⚽" label="Editor" active={location.pathname === '/'} />
           <TabLink to="/players" icon="👥" label="Squad" active={location.pathname === '/players'} />
           <TabLink to="/lineups" icon="📋" label="Matches" active={location.pathname === '/lineups'} />
-          <TabLink to="/stats" icon="📊" label="Stats" active={location.pathname === '/stats'} />
+          <TabLink to="/more" icon="⋯" label="More" active={['/stats','/attendance','/compare','/templates','/more'].includes(location.pathname)} />
         </nav>
       </>
     )
@@ -68,7 +68,7 @@ export default function Nav() {
       <NavLink to="/" label="Editor" active={location.pathname === '/'} />
       <NavLink to="/players" label="Squad" active={location.pathname === '/players'} />
       <NavLink to="/lineups" label="Matches" active={location.pathname === '/lineups'} />
-      <NavLink to="/stats" label="Stats" active={location.pathname === '/stats'} />
+      <NavLink to="/more" label="More" active={['/stats','/attendance','/compare','/templates','/more'].includes(location.pathname)} />
       <div style={{ flex: 1 }} />
       <button onClick={toggle} style={{ background: 'none', border: 'none', fontSize: 16, padding: '4px 8px', color: 'var(--text2)', cursor: 'pointer' }}>
         {theme === 'dark' ? '☀️' : '🌙'}
