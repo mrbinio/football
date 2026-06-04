@@ -5,7 +5,7 @@ type Theme = 'dark' | 'light'
 const ThemeContext = createContext<{ theme: Theme; toggle: () => void }>({ theme: 'dark', toggle: () => {} })
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('bp-theme') as Theme) || 'dark')
+  const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('bp-theme') as Theme) || 'light')
 
   useEffect(() => {
     localStorage.setItem('bp-theme', theme)
