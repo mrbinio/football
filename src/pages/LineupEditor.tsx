@@ -25,6 +25,7 @@ export default function LineupEditor() {
   const [saving, setSaving] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null)
   const [nextIn, setNextIn] = useState<string[]>([])
+  const [unavailable, setUnavailable] = useState<string[]>([])
   const [timerRunning, setTimerRunning] = useState(false)
   const [timerSeconds, setTimerSeconds] = useState(0)
   const [playerMinutes, setPlayerMinutes] = useState<Record<string, number>>({})
@@ -81,7 +82,8 @@ export default function LineupEditor() {
   }, [id])
 
   const assignedPlayerIds = [...Object.values(positions), ...bench]
-  const availablePlayers = players.filter(p => !assignedPlayerIds.includes(p.id))
+  const availablePlayers = players.filter(p => !assignedPlayerIds.includes(p.id) && !unavailable.includes(p.id))
+  const unavailablePlayers = players.filter(p => unavailable.includes(p.id) && !assignedPlayerIds.includes(p.id))
 
   // --- Mobile: tap to assign ---
   const handlePlayerTap = (playerId: string) => {
@@ -393,28 +395,57 @@ export default function LineupEditor() {
             {availablePlayers.map(p => (
               <div
                 key={p.id}
-                onClick={() => handlePlayerTap(p.id)}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '10px 12px', borderRadius: 10,
-                  background: selectedPlayer === p.id ? 'rgba(211,47,47,0.15)' : 'rgba(255,255,255,0.03)',
-                  border: selectedPlayer === p.id ? '1px solid #d32f2f' : '1px solid rgba(255,255,255,0.06)',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '10px 10px', borderRadius: 10,
+                  background: selectedPlayer === p.id ? 'rgba(211,47,47,0.15)' : 'var(--card)',
+                  border: selectedPlayer === p.id ? '1px solid #d32f2f' : '1px solid var(--card-border)',
                   cursor: 'pointer', transition: 'all 0.15s',
                 }}
               >
-                <div style={{
-                  width: 28, height: 28, borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #d32f2f, #b71c1c)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0,
-                }}>{p.number || '-'}</div>
-                <div style={{ overflow: 'hidden' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.shirtName}</div>
-                  <div style={{ fontSize: 9, color: 'var(--text3)' }}>{p.position}</div>
+                <div onClick={() => handlePlayerTap(p.id)} style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    width: 26, height: 26, borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #d32f2f, #b71c1c)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 9, fontWeight: 700, color: '#fff', flexShrink: 0,
+                  }}>{p.number || '-'}</div>
+                  <div style={{ overflow: 'hidden' }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.shirtName}</div>
+                    <div style={{ fontSize: 9, color: 'var(--text3)' }}>{p.position}</div>
+                  </div>
                 </div>
+                <span onClick={e => { e.stopPropagation(); setUnavailable(prev => [...prev, p.id]) }} style={{ fontSize: 12, opacity: 0.4, cursor: 'pointer' }}>❌</span>
               </div>
             ))}
           </div>
+
+          {unavailablePlayers.length > 0 && (
+            <>
+              <h3 style={{ fontSize: 11, color: 'var(--text3)', marginTop: 16, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5 }}>
+                Unavailable ({unavailablePlayers.length})
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 6 }}>
+                {unavailablePlayers.map(p => (
+                  <div key={p.id} onClick={() => setUnavailable(prev => prev.filter(id => id !== p.id))} style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '10px 10px', borderRadius: 10,
+                    background: 'var(--card)', border: '1px solid var(--card-border)',
+                    opacity: 0.4, cursor: 'pointer',
+                  }}>
+                    <div style={{
+                      width: 26, height: 26, borderRadius: '50%',
+                      background: '#888',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 9, fontWeight: 700, color: '#fff', flexShrink: 0,
+                    }}>{p.number || '-'}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text3)', textDecoration: 'line-through' }}>{p.shirtName}</div>
+                    <span style={{ fontSize: 10, marginLeft: 'auto' }}>↩</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
 
           {bench.length > 0 && (
             <>
