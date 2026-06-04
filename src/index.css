@@ -7,27 +7,31 @@
 :root {
   --bg: #121620;
   --bg2: #161b28;
-  --card: rgba(255,255,255,0.03);
+  --card: rgba(255,255,255,0.04);
   --card-border: rgba(255,255,255,0.06);
+  --card-hover: rgba(255,255,255,0.06);
   --text: #f0f0f0;
-  --text2: #999;
-  --text3: #555;
+  --text2: #aaa;
+  --text3: #666;
   --input-bg: rgba(255,255,255,0.05);
   --input-border: rgba(255,255,255,0.08);
   --nav-bg: rgba(18,22,32,0.95);
+  --action-bar: rgba(16,20,28,0.98);
 }
 
 [data-theme="light"] {
-  --bg: #f5f5f7;
-  --bg2: #eeeef0;
-  --card: rgba(0,0,0,0.03);
+  --bg: #f2f3f5;
+  --bg2: #e8e9ec;
+  --card: #ffffff;
   --card-border: rgba(0,0,0,0.08);
+  --card-hover: #f8f8f8;
   --text: #1a1a1a;
-  --text2: #666;
+  --text2: #555;
   --text3: #999;
-  --input-bg: rgba(0,0,0,0.04);
-  --input-border: rgba(0,0,0,0.1);
-  --nav-bg: rgba(255,255,255,0.95);
+  --input-bg: #ffffff;
+  --input-border: rgba(0,0,0,0.12);
+  --nav-bg: rgba(255,255,255,0.97);
+  --action-bar: rgba(255,255,255,0.97);
 }
 
 body {

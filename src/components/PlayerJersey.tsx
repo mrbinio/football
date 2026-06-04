@@ -17,11 +17,11 @@ export default function PlayerJersey({ player, size = 'small', timeSeconds }: Pr
     alignItems: 'center',
     gap: 10,
     padding: size === 'small' ? '10px 12px' : 0,
-    background: size === 'small' ? 'rgba(255,255,255,0.03)' : 'transparent',
+    background: size === 'small' ? 'var(--card)' : 'transparent',
     borderRadius: 10,
     userSelect: 'none',
     touchAction: 'none',
-    border: size === 'small' ? '1px solid rgba(255,255,255,0.08)' : 'none',
+    border: size === 'small' ? '1px solid var(--card-border)' : 'none',
     opacity: isDragging ? 0.5 : 1,
     transition: 'opacity 0.15s, box-shadow 0.2s, background 0.2s',
   }
@@ -107,8 +107,8 @@ export default function PlayerJersey({ player, size = 'small', timeSeconds }: Pr
     <div ref={setNodeRef} {...listeners} {...attributes} style={style}>
       <Jersey w={26} h={28} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: '#eee' }}>{player.shirtName || player.name}</span>
-        <span style={{ fontSize: 10, color: '#555' }}>#{player.number} · {player.position}</span>
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{player.shirtName || player.name}</span>
+        <span style={{ fontSize: 10, color: 'var(--text3)' }}>#{player.number} · {player.position}</span>
       </div>
     </div>
   )

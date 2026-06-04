@@ -47,14 +47,14 @@ export default function Login() {
   if (showReset) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: 20 }}>
-        <div style={{ background: '#1a1a1a', borderRadius: 16, padding: 32, width: '100%', maxWidth: 360, border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ background: 'var(--card)', borderRadius: 16, padding: 32, width: '100%', maxWidth: 360, border: '1px solid var(--card-border)' }}>
           <h2 style={{ fontSize: 18, marginBottom: 8 }}>Reset Password</h2>
-          <p style={{ color: '#888', fontSize: 13, marginBottom: 20 }}>Enter your email and we'll send you a reset link.</p>
+          <p style={{ color: 'var(--text2)', fontSize: 13, marginBottom: 20 }}>Enter your email and we'll send you a reset link.</p>
           <form onSubmit={handleResetPassword} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <input type="email" placeholder="Email address" value={resetEmail} onChange={e => setResetEmail(e.target.value)} required />
             <button type="submit" style={{ background: '#d32f2f', color: '#fff' }}>Send Reset Link</button>
           </form>
-          <button onClick={() => { setShowReset(false); setError('') }} style={{ background: 'transparent', color: '#888', marginTop: 16, fontSize: 13 }}>
+          <button onClick={() => { setShowReset(false); setError('') }} style={{ background: 'transparent', color: 'var(--text2)', marginTop: 16, fontSize: 13 }}>
             ← Back to login
           </button>
           {message && <p style={{ color: '#4CAF50', marginTop: 12, fontSize: 13 }}>{message}</p>}
@@ -66,11 +66,11 @@ export default function Login() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: 20 }}>
-      <div style={{ background: '#1a1a1a', borderRadius: 16, padding: 32, width: '100%', maxWidth: 360, border: '1px solid rgba(255,255,255,0.08)' }}>
+      <div style={{ background: 'var(--card)', borderRadius: 16, padding: 32, width: '100%', maxWidth: 360, border: '1px solid var(--card-border)' }}>
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <img src="/bp-logo.jpg" alt="BP" style={{ width: 56, height: 56, borderRadius: 12, marginBottom: 12, objectFit: 'cover' }} />
           <h1 style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>BP Lineup</h1>
-          <p style={{ color: '#666', fontSize: 12, marginTop: 4 }}>Coaching tool · P18-8</p>
+          <p style={{ color: 'var(--text3)', fontSize: 12, marginTop: 4 }}>Coaching tool · P18-8</p>
         </div>
 
         <button onClick={handleGoogle} style={{
@@ -96,7 +96,7 @@ export default function Login() {
         </form>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 14 }}>
-          <button onClick={() => setShowReset(true)} style={{ background: 'transparent', color: '#666', padding: 0, fontSize: 12 }}>
+          <button onClick={() => setShowReset(true)} style={{ background: 'transparent', color: 'var(--text3)', padding: 0, fontSize: 12 }}>
             Forgot password?
           </button>
           <button onClick={() => setIsSignUp(!isSignUp)} style={{ background: 'transparent', color: '#d32f2f', padding: 0, fontSize: 12 }}>

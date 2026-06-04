@@ -46,7 +46,7 @@ export default function Stats() {
       <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, letterSpacing: -0.5 }}>Stats</h2>
 
       {/* Per match stats */}
-      <h3 style={{ fontSize: 12, color: '#888', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Per Match</h3>
+      <h3 style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Per Match</h3>
 
       {matchesWithTime.length === 0 && (
         <p style={{ color: '#555', textAlign: 'center', padding: 20, fontSize: 13 }}>
@@ -65,7 +65,7 @@ export default function Stats() {
             <div key={l.id}>
               <div onClick={() => setExpandedMatch(isExpanded ? null : l.id)} style={{
                 display: 'flex', alignItems: 'center', gap: 10,
-                background: 'rgba(255,255,255,0.03)', padding: '12px 14px', borderRadius: 12,
+                background: 'var(--card)', padding: '12px 14px', borderRadius: 12,
                 border: isExpanded ? '1px solid rgba(211,47,47,0.3)' : '1px solid rgba(255,255,255,0.05)',
                 cursor: 'pointer',
               }}>
@@ -76,9 +76,9 @@ export default function Stats() {
                 }}>⚽</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>{l.title || `vs ${l.opponent || 'TBD'}`}</div>
-                  <div style={{ fontSize: 11, color: '#666' }}>{l.matchDate} · {matchPlayers.length} players tracked</div>
+                  <div style={{ fontSize: 11, color: 'var(--text3)' }}>{l.matchDate} · {matchPlayers.length} players tracked</div>
                 </div>
-                <span style={{ fontSize: 14, color: '#666' }}>{isExpanded ? '▾' : '▸'}</span>
+                <span style={{ fontSize: 14, color: 'var(--text3)' }}>{isExpanded ? '▾' : '▸'}</span>
               </div>
 
               {isExpanded && (
@@ -96,7 +96,7 @@ export default function Stats() {
                     return (
                       <div key={pId} style={{
                         padding: '6px 10px', borderRadius: 8,
-                        background: 'rgba(255,255,255,0.02)',
+                        background: 'var(--card)',
                       }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                           {p.photoURL ? (
@@ -125,7 +125,7 @@ export default function Stats() {
                       updateDoc(doc(db, 'lineups', l.id), { playerSeconds: {} })
                     }
                   }} style={{
-                    marginTop: 6, background: 'rgba(255,255,255,0.03)', color: '#888',
+                    marginTop: 6, background: 'var(--card)', color: 'var(--text2)',
                     fontSize: 10, padding: '5px 10px', border: '1px solid rgba(255,255,255,0.08)',
                   }}>
                     🗑 Clear match stats
@@ -140,7 +140,7 @@ export default function Stats() {
       {/* Total */}
       {totals.length > 0 && (
         <>
-          <h3 style={{ fontSize: 12, color: '#888', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Total Playing Time</h3>
+          <h3 style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Total Playing Time</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {totals.map(({ player: p, totalSeconds, matches }) => {
               const maxSec = totals[0].totalSeconds || 1
@@ -148,7 +148,7 @@ export default function Stats() {
               const isLow = pct < 40
               return (
                 <div key={p.id} style={{
-                  background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: '10px 14px',
+                  background: 'var(--card)', borderRadius: 12, padding: '10px 14px',
                   border: isLow ? '1px solid rgba(255,193,7,0.2)' : '1px solid rgba(255,255,255,0.05)',
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
@@ -163,7 +163,7 @@ export default function Stats() {
                       }}>{p.number}</div>
                     )}
                     <span style={{ fontSize: 12, fontWeight: 600, flex: 1 }}>{p.shirtName || p.name}</span>
-                    <span style={{ fontSize: 10, color: '#666' }}>{matches}m</span>
+                    <span style={{ fontSize: 10, color: 'var(--text3)' }}>{matches}m</span>
                     <span style={{ fontSize: 12, fontWeight: 700, color: isLow ? '#FFC107' : '#4CAF50' }}>{formatTime(totalSeconds)}</span>
                   </div>
                   <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.06)' }}>

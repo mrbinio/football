@@ -287,8 +287,8 @@ export default function LineupEditor() {
       <div style={{ padding: '16px', paddingBottom: 140, maxWidth: 500, margin: '0 auto' }}>
         {/* Controls */}
         <div style={{
-          background: 'rgba(255,255,255,0.02)', borderRadius: 14,
-          padding: 12, marginBottom: 14, border: '1px solid rgba(255,255,255,0.04)',
+          background: 'var(--card)', borderRadius: 14,
+          padding: 12, marginBottom: 14, border: '1px solid var(--card-border)',
         }}>
           <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
             <input type="date" value={matchDate} onChange={e => setMatchDate(e.target.value)} style={{ flex: 1, minWidth: 110 }} />
@@ -309,8 +309,8 @@ export default function LineupEditor() {
         {/* Match timer */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14,
-          background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: '10px 14px',
-          border: '1px solid rgba(255,255,255,0.06)',
+          background: 'var(--card)', borderRadius: 12, padding: '10px 14px',
+          border: '1px solid var(--card-border)',
         }}>
           <span style={{ fontSize: 22, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: timerRunning ? '#4CAF50' : '#888', flex: 1 }}>
             ⏱ {formatTime(timerSeconds)}
@@ -324,7 +324,7 @@ export default function LineupEditor() {
             {timerRunning ? '⏸ Pause' : '▶ Start'}
           </button>
           <button onClick={() => { setTimerRunning(false); setTimerSeconds(0); setPlayerMinutes({}) }} style={{
-            background: 'rgba(255,255,255,0.05)', color: '#888',
+            background: 'rgba(255,255,255,0.05)', color: 'var(--text2)',
             border: '1px solid rgba(255,255,255,0.08)',
             padding: '6px 10px', fontSize: 12,
           }}>
@@ -368,7 +368,7 @@ export default function LineupEditor() {
             borderRadius: 10, padding: '10px 14px', marginTop: 12,
             display: 'flex', alignItems: 'center', gap: 8,
           }}>
-            <span style={{ fontSize: 12, color: '#eee', flex: 1 }}>
+            <span style={{ fontSize: 12, color: 'var(--text)', flex: 1 }}>
               <strong>{players.find(p => p.id === selectedPlayer)?.shirtName}</strong> →
             </span>
             <button onClick={() => {
@@ -386,7 +386,7 @@ export default function LineupEditor() {
 
         {/* Players list below pitch */}
         <div style={{ marginTop: 20 }}>
-          <h3 style={{ fontSize: 11, color: '#666', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5 }}>
+          <h3 style={{ fontSize: 11, color: 'var(--text3)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5 }}>
             Available ({availablePlayers.length})
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 6 }}>
@@ -409,8 +409,8 @@ export default function LineupEditor() {
                   fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0,
                 }}>{p.number || '-'}</div>
                 <div style={{ overflow: 'hidden' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: '#eee', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.shirtName}</div>
-                  <div style={{ fontSize: 9, color: '#555' }}>{p.position}</div>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.shirtName}</div>
+                  <div style={{ fontSize: 9, color: 'var(--text3)' }}>{p.position}</div>
                 </div>
               </div>
             ))}
@@ -418,7 +418,7 @@ export default function LineupEditor() {
 
           {bench.length > 0 && (
             <>
-              <h3 style={{ fontSize: 11, color: '#666', marginTop: 16, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5 }}>Bench <span style={{ color: '#444', fontWeight: 400 }}>· tap ★ = next in</span></h3>
+              <h3 style={{ fontSize: 11, color: 'var(--text3)', marginTop: 16, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5 }}>Bench <span style={{ color: '#444', fontWeight: 400 }}>· tap ★ = next in</span></h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 6 }}>
                 {bench.map(bId => {
                   const p = players.find(pl => pl.id === bId)
@@ -438,7 +438,7 @@ export default function LineupEditor() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0,
                       }}>{p.number || '-'}</div>
-                      <div onClick={() => handlePlayerTap(p.id)} style={{ fontSize: 11, fontWeight: 600, color: '#eee', flex: 1 }}>{p.shirtName}</div>
+                      <div onClick={() => handlePlayerTap(p.id)} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', flex: 1 }}>{p.shirtName}</div>
                       <span onClick={e => { e.stopPropagation(); setNextIn(prev => prev.includes(p.id) ? prev.filter(x => x !== p.id) : [...prev, p.id]) }} style={{ fontSize: 16, cursor: 'pointer', opacity: isNextIn ? 1 : 0.3 }}>★</span>
                     </div>
                   )
@@ -450,7 +450,7 @@ export default function LineupEditor() {
           {/* On-pitch players — tap to remove */}
           {Object.values(positions).length > 0 && (
             <>
-              <h3 style={{ fontSize: 11, color: '#666', marginTop: 16, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5 }}>On pitch (tap to move)</h3>
+              <h3 style={{ fontSize: 11, color: 'var(--text3)', marginTop: 16, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5 }}>On pitch (tap to move)</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 6 }}>
                 {Object.entries(positions).map(([posKey, pId]) => {
                   const p = players.find(pl => pl.id === pId)
@@ -470,7 +470,7 @@ export default function LineupEditor() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 8, fontWeight: 700, color: '#fff', flexShrink: 0,
                       }}>{posLabel}</div>
-                      <div onClick={() => handleRemoveFromPosition(pId)} style={{ fontSize: 11, fontWeight: 600, color: '#eee', flex: 1, cursor: 'pointer' }}>{p.shirtName}</div>
+                      <div onClick={() => handleRemoveFromPosition(pId)} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', flex: 1, cursor: 'pointer' }}>{p.shirtName}</div>
                       {mins > 0 && <span style={{ fontSize: 10, color: '#4CAF50', fontWeight: 600 }}>{formatTime(mins)}</span>}
                       {hasNextIn && (
                         <button onClick={() => {
@@ -499,8 +499,8 @@ export default function LineupEditor() {
         <div style={{
           position: 'fixed', bottom: 56, left: 0, right: 0,
           display: 'flex', gap: 6, padding: '10px 12px',
-          background: 'rgba(16,20,28,0.98)', backdropFilter: 'blur(20px)',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
+          background: 'var(--action-bar)', backdropFilter: 'blur(20px)',
+          borderTop: '1px solid var(--card-border)',
           zIndex: 100,
         }}>
           <button onClick={handleSave} disabled={saving} style={{ flex: 1, background: 'linear-gradient(135deg, #d32f2f, #9a0007)', color: '#fff', fontSize: 12, padding: '10px 0', boxShadow: '0 2px 12px rgba(211,47,47,0.2)' }}>
@@ -522,7 +522,7 @@ export default function LineupEditor() {
         display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20, alignItems: 'center',
         background: 'linear-gradient(135deg, #141414 0%, #1a1a1a 100%)',
         padding: '16px 20px', borderRadius: 14,
-        border: '1px solid rgba(255,255,255,0.06)',
+        border: '1px solid var(--card-border)',
         boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
       }}>
         <input type="date" value={matchDate} onChange={e => setMatchDate(e.target.value)} />
@@ -553,12 +553,12 @@ export default function LineupEditor() {
             <Pitch formation={formation} positions={positions} players={players} playerSeconds={playerMinutes} />
           </div>
           <div style={{ width: 220, display: 'flex', flexDirection: 'column', gap: 16, position: 'sticky', top: 80 }}>
-            <div style={{ background: 'linear-gradient(135deg, #141414, #1a1a1a)', borderRadius: 14, padding: 14, border: '1px solid rgba(255,255,255,0.06)' }}>
-              <h3 style={{ fontSize: 11, color: '#666', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600 }}>Bench</h3>
+            <div style={{ background: 'linear-gradient(135deg, #141414, #1a1a1a)', borderRadius: 14, padding: 14, border: '1px solid var(--card-border)' }}>
+              <h3 style={{ fontSize: 11, color: 'var(--text3)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600 }}>Bench</h3>
               <BenchArea bench={bench} players={players} />
             </div>
-            <div style={{ background: 'linear-gradient(135deg, #141414, #1a1a1a)', borderRadius: 14, padding: 14, border: '1px solid rgba(255,255,255,0.06)' }}>
-              <h3 style={{ fontSize: 11, color: '#666', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600 }}>Available ({availablePlayers.length})</h3>
+            <div style={{ background: 'linear-gradient(135deg, #141414, #1a1a1a)', borderRadius: 14, padding: 14, border: '1px solid var(--card-border)' }}>
+              <h3 style={{ fontSize: 11, color: 'var(--text3)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600 }}>Available ({availablePlayers.length})</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 380, overflowY: 'auto' }}>
                 {availablePlayers.map(p => (<PlayerJersey key={p.id} player={p} size="small" />))}
               </div>

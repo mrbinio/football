@@ -58,8 +58,8 @@ export default function Lineups() {
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
         }} onClick={() => setEditId(null)}>
           <div onClick={e => e.stopPropagation()} style={{
-            background: '#1a1a1a', borderRadius: 16, padding: 24, width: '100%', maxWidth: 400,
-            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'var(--card)', borderRadius: 16, padding: 24, width: '100%', maxWidth: 400,
+            border: '1px solid var(--card-border)',
           }}>
             <h3 style={{ marginBottom: 16 }}>Edit Lineup</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -68,7 +68,7 @@ export default function Lineups() {
               <input placeholder="Result (e.g. 3-1 W)" value={result} onChange={e => setResult(e.target.value)} />
               <input placeholder="Scorers (e.g. Biniarz x2, Hasani)" value={scorers} onChange={e => setScorers(e.target.value)} />
               <div>
-                <label style={{ fontSize: 12, color: '#888', marginBottom: 4, display: 'block' }}>Match Rating</label>
+                <label style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 4, display: 'block' }}>Match Rating</label>
                 <div style={{ display: 'flex', gap: 4 }}>
                   {[1,2,3,4,5].map(n => (
                     <button key={n} onClick={() => setRating(n)} style={{
@@ -85,7 +85,7 @@ export default function Lineups() {
                 value={notes} onChange={e => setNotes(e.target.value)}
                 rows={4}
                 style={{
-                  padding: 12, borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)',
+                  padding: 12, borderRadius: 10, border: '1px solid var(--card-border)',
                   background: 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 13, resize: 'vertical',
                 }}
               />
@@ -99,9 +99,9 @@ export default function Lineups() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {lineups.map(l => (
           <div key={l.id} style={{
-            background: 'linear-gradient(135deg, #141414, #1a1a1a)',
+            background: 'var(--card)',
             padding: '14px 16px', borderRadius: 12,
-            border: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer',
+            border: '1px solid var(--card-border)', cursor: 'pointer',
             transition: 'border-color 0.2s',
           }} onClick={() => navigate(`/lineup/${l.id}`)}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -114,14 +114,14 @@ export default function Lineups() {
                 <div style={{ fontWeight: 600, fontSize: 14 }}>
                   {l.title || `vs ${l.opponent || 'TBD'}`}
                 </div>
-                <div style={{ fontSize: 12, color: '#666' }}>
+                <div style={{ fontSize: 12, color: 'var(--text3)' }}>
                   {l.matchDate} · {l.formation} · {l.createdByName || l.createdBy}
                 </div>
                 {l.result && <div style={{ fontSize: 11, color: '#d32f2f', marginTop: 2 }}>Result: {l.result}</div>}
                 {l.rating > 0 && <div style={{ fontSize: 12, marginTop: 2 }}>{'★'.repeat(l.rating)}{'☆'.repeat(5 - l.rating)}</div>}
               </div>
-              <button onClick={e => openEdit(e, l)} onTouchEnd={e => { e.stopPropagation(); openEdit(e as unknown as React.MouseEvent, l) }} style={{ background: 'rgba(255,255,255,0.05)', color: '#888', padding: '8px 12px', fontSize: 12, border: '1px solid rgba(255,255,255,0.08)', minWidth: 36 }}>✏️</button>
-              <button onClick={e => handleDelete(e, l.id)} onTouchEnd={e => { e.stopPropagation(); handleDelete(e as unknown as React.MouseEvent, l.id) }} style={{ background: 'rgba(255,255,255,0.05)', color: '#d32f2f', padding: '8px 12px', fontSize: 12, border: '1px solid rgba(255,255,255,0.08)', minWidth: 36 }}>✕</button>
+              <button onClick={e => openEdit(e, l)} onTouchEnd={e => { e.stopPropagation(); openEdit(e as unknown as React.MouseEvent, l) }} style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text2)', padding: '8px 12px', fontSize: 12, border: '1px solid var(--card-border)', minWidth: 36 }}>✏️</button>
+              <button onClick={e => handleDelete(e, l.id)} onTouchEnd={e => { e.stopPropagation(); handleDelete(e as unknown as React.MouseEvent, l.id) }} style={{ background: 'rgba(255,255,255,0.05)', color: '#d32f2f', padding: '8px 12px', fontSize: 12, border: '1px solid var(--card-border)', minWidth: 36 }}>✕</button>
             </div>
           </div>
         ))}
