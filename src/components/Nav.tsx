@@ -89,7 +89,7 @@ function TabLink({ to, icon, label, active }: { to: string; icon: string; label:
     <Link to={to} style={{
       flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
       padding: '10px 0 8px', textDecoration: 'none',
-      color: active ? '#d32f2f' : '#555',
+      color: active ? 'var(--accent)' : 'var(--text3)',
       transition: 'color 0.2s',
     }}>
       <span style={{ fontSize: 18, marginBottom: 2 }}>{icon}</span>
@@ -103,10 +103,10 @@ function NavLink({ to, label, active }: { to: string; label: string; active: boo
     <Link to={to} style={{
       textDecoration: 'none',
       fontSize: 13, fontWeight: active ? 600 : 400,
-      color: active ? '#fff' : '#666',
+      color: active ? 'var(--text)' : 'var(--text3)',
       padding: '6px 12px',
       borderRadius: 8,
-      background: active ? 'rgba(211,47,47,0.1)' : 'transparent',
+      background: active ? 'rgba(76,82,46,0.1)' : 'transparent',
       transition: 'all 0.2s',
     }}>
       {label}

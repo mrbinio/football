@@ -312,7 +312,7 @@ export default function LineupEditor() {
           background: 'var(--card)', borderRadius: 16, padding: '10px 14px',
           border: '1px solid var(--card-border)',
         }}>
-          <span style={{ fontSize: 32, fontWeight: 300, fontVariantNumeric: 'tabular-nums', color: timerRunning ? '#d32f2f' : 'var(--text3)', flex: 1, letterSpacing: -1 }}>
+          <span style={{ fontSize: 32, fontWeight: 300, fontVariantNumeric: 'tabular-nums', color: timerRunning ? 'var(--accent)' : 'var(--text3)', flex: 1, letterSpacing: -1 }}>
             ⏱ {formatTime(timerSeconds)}
           </span>
           <button onClick={() => setTimerRunning(!timerRunning)} style={{
