@@ -2,10 +2,12 @@ import { Link, useLocation } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
 import { auth } from '../firebase'
 import { getCoachName } from '../coaches'
+import { useTheme } from '../theme'
 
 export default function Nav() {
   const location = useLocation()
   const name = getCoachName(auth.currentUser?.email || '')
+  const { theme, toggle } = useTheme()
   const isMobile = window.innerWidth < 768
 
   if (isMobile) {
@@ -14,16 +16,19 @@ export default function Nav() {
         {/* Top bar - minimal */}
         <div style={{
           display: 'flex', alignItems: 'center', padding: '10px 16px',
-          background: 'rgba(18,22,32,0.95)', backdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          background: 'var(--nav-bg)', backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid var(--card-border)',
           position: 'sticky', top: 0, zIndex: 100,
         }}>
           <img src="/bp-logo.jpg" alt="BP" style={{ width: 22, height: 22, borderRadius: 5, objectFit: 'cover' }} />
-          <span style={{ color: '#fff', fontWeight: 700, fontSize: 13, marginLeft: 8 }}>BP</span>
-          <span style={{ fontSize: 10, color: '#444', marginLeft: 6 }}>P18-8</span>
+          <span style={{ color: 'var(--text)', fontWeight: 700, fontSize: 13, marginLeft: 8 }}>BP</span>
+          <span style={{ fontSize: 10, color: 'var(--text3)', marginLeft: 6 }}>P18-8</span>
           <div style={{ flex: 1 }} />
-          <span style={{ fontSize: 10, color: '#555' }}>{name}</span>
-          <button onClick={() => signOut(auth)} style={{ background: 'none', color: '#555', padding: '4px 8px', fontSize: 10, marginLeft: 8, border: 'none' }}>
+          <button onClick={toggle} style={{ background: 'none', border: 'none', fontSize: 16, padding: '4px', color: 'var(--text2)' }}>
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+          <span style={{ fontSize: 10, color: 'var(--text3)' }}>{name}</span>
+          <button onClick={() => signOut(auth)} style={{ background: 'none', color: 'var(--text3)', padding: '4px 8px', fontSize: 10, marginLeft: 4, border: 'none' }}>
             Logout
           </button>
         </div>
@@ -32,8 +37,8 @@ export default function Nav() {
         <nav style={{
           position: 'fixed', bottom: 0, left: 0, right: 0,
           display: 'flex', zIndex: 99,
-          background: 'rgba(16,20,28,0.97)', backdropFilter: 'blur(20px)',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
+          background: 'var(--nav-bg)', backdropFilter: 'blur(20px)',
+          borderTop: '1px solid var(--card-border)',
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}>
           <TabLink to="/" icon="⚽" label="Editor" active={location.pathname === '/'} />
@@ -49,9 +54,9 @@ export default function Nav() {
   return (
     <nav style={{
       display: 'flex', gap: 20, padding: '14px 28px',
-      background: 'rgba(18,22,32,0.95)', backdropFilter: 'blur(20px)',
+      background: 'var(--nav-bg)', backdropFilter: 'blur(20px)',
       alignItems: 'center',
-      borderBottom: '1px solid rgba(255,255,255,0.07)',
+      borderBottom: '1px solid var(--card-border)',
       position: 'sticky', top: 0, zIndex: 100,
     }}>
       <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
@@ -65,10 +70,13 @@ export default function Nav() {
       <NavLink to="/lineups" label="Matches" active={location.pathname === '/lineups'} />
       <NavLink to="/stats" label="Stats" active={location.pathname === '/stats'} />
       <div style={{ flex: 1 }} />
-      <span style={{ fontSize: 12, color: '#555' }}>{name}</span>
+      <button onClick={toggle} style={{ background: 'none', border: 'none', fontSize: 16, padding: '4px 8px', color: 'var(--text2)', cursor: 'pointer' }}>
+        {theme === 'dark' ? '☀️' : '🌙'}
+      </button>
+      <span style={{ fontSize: 12, color: 'var(--text3)' }}>{name}</span>
       <button onClick={() => signOut(auth)} style={{
-        background: 'rgba(255,255,255,0.04)', color: '#666', padding: '6px 12px', fontSize: 11,
-        border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8,
+        background: 'var(--card)', color: 'var(--text2)', padding: '6px 12px', fontSize: 11,
+        border: '1px solid var(--card-border)', borderRadius: 8,
       }}>
         Logout
       </button>
