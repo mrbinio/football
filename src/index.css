@@ -23,19 +23,19 @@
 }
 
 [data-theme="dark"] {
-  --bg: #111810;
-  --bg2: #171e14;
-  --card: #1e2618;
-  --card-border: rgba(213,191,147,0.08);
-  --card-hover: #252e1e;
+  --bg: #0c1220;
+  --bg2: #101828;
+  --card: #162032;
+  --card-border: rgba(255,255,255,0.06);
+  --card-hover: #1a2840;
   --card-shadow: 0 2px 12px rgba(0,0,0,0.4);
-  --text: #FAF6EE;
-  --text2: #D5BF93;
-  --text3: #8a7f60;
-  --input-bg: #1e2618;
-  --input-border: rgba(213,191,147,0.12);
-  --nav-bg: rgba(17,24,16,0.95);
-  --action-bar: rgba(17,24,16,0.97);
+  --text: #f0f2f5;
+  --text2: #94a3b8;
+  --text3: #5a6a80;
+  --input-bg: #162032;
+  --input-border: rgba(255,255,255,0.1);
+  --nav-bg: rgba(12,18,32,0.95);
+  --action-bar: rgba(12,18,32,0.97);
   --accent: #D5BF93;
   --accent2: #616946;
 }
