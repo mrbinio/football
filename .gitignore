@@ -8,3 +8,6 @@ cors.json
 /intro-bp.jpg
 /screenshot.jpeg
 030526.json
+*.png
+*.webp
+.DS_Store
