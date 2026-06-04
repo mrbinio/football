@@ -90,23 +90,33 @@ export default function Stats() {
                   {matchPlayers.map(([pId, seconds]) => {
                     const p = players.find(pl => pl.id === pId)
                     if (!p) return null
+                    const maxInMatch = matchPlayers[0][1]
+                    const pct = (seconds / maxInMatch) * 100
+                    const isLow = pct < 40
                     return (
                       <div key={pId} style={{
-                        display: 'flex', alignItems: 'center', gap: 8,
                         padding: '6px 10px', borderRadius: 8,
                         background: 'rgba(255,255,255,0.02)',
                       }}>
-                        {p.photoURL ? (
-                          <img src={p.photoURL} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }} />
-                        ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                          {p.photoURL ? (
+                            <img src={p.photoURL} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }} />
+                          ) : (
+                            <div style={{
+                              width: 24, height: 24, borderRadius: '50%',
+                              background: '#d32f2f', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              fontSize: 9, fontWeight: 700, color: '#fff',
+                            }}>{p.number}</div>
+                          )}
+                          <span style={{ fontSize: 12, flex: 1 }}>{p.shirtName || p.name}</span>
+                          <span style={{ fontSize: 12, fontWeight: 600, color: isLow ? '#FFC107' : '#4CAF50' }}>{formatTime(seconds)}</span>
+                        </div>
+                        <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.06)' }}>
                           <div style={{
-                            width: 24, height: 24, borderRadius: '50%',
-                            background: '#d32f2f', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 9, fontWeight: 700, color: '#fff',
-                          }}>{p.number}</div>
-                        )}
-                        <span style={{ fontSize: 12, flex: 1 }}>{p.shirtName || p.name}</span>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: '#4CAF50' }}>{formatTime(seconds)}</span>
+                            height: '100%', borderRadius: 2, width: `${pct}%`,
+                            background: isLow ? 'linear-gradient(90deg, #FFC107, #FF9800)' : 'linear-gradient(90deg, #4CAF50, #2E7D32)',
+                          }} />
+                        </div>
                       </div>
                     )
                   })}
