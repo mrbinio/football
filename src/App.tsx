@@ -8,6 +8,7 @@ import Login from './pages/Login'
 import LineupEditor from './pages/LineupEditor'
 import Players from './pages/Players'
 import Lineups from './pages/Lineups'
+import Stats from './pages/Stats'
 import Nav from './components/Nav'
 import Intro from './components/Intro'
 
@@ -52,6 +53,7 @@ export default function App() {
         <Route path="/" element={<LineupEditor />} />
         <Route path="/players" element={<Players />} />
         <Route path="/lineups" element={<Lineups />} />
+        <Route path="/stats" element={<Stats />} />
         <Route path="/lineup/:id" element={<LineupEditor />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

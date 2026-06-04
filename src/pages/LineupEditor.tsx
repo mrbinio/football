@@ -164,7 +164,7 @@ export default function LineupEditor() {
     setSaving(true)
     const data = {
       matchDate, opponent, title, formation: formation.name,
-      positions, bench,
+      positions, bench, playerSeconds: playerMinutes,
       createdBy: auth.currentUser?.email || '',
       createdByName: getCoachName(auth.currentUser?.email || ''),
       createdAt: Date.now(),

@@ -19,6 +19,7 @@ export interface Lineup {
   result: string
   scorers: string
   rating: number
+  playerSeconds: Record<string, number>
   createdBy: string
   createdByName: string
   createdAt: number
